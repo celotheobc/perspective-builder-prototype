@@ -1,0 +1,556 @@
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  MarkerType,
+  ReactFlow,
+  ReactFlowProvider,
+  Background,
+  Controls,
+  useEdgesState,
+  useNodesState,
+} from '@xyflow/react';
+import PerspectiveNode from './PerspectiveNode';
+import RouteEdge from './RouteEdge';
+import MakeGridBackdrop from './MakeGridBackdrop';
+import GraphCycleOverlay from './GraphCycleOverlay';
+import GraphConnectionOverlay from './GraphConnectionOverlay';
+import GraphInsertPopover from './GraphInsertPopover';
+import ContextualDiscoveryMenu from './ContextualDiscoveryMenu';
+import GraphCanvasControls from './GraphCanvasControls';
+import {
+  buildProgressiveGraph,
+  buildRouteAmbiguityGraph,
+} from '../../utils/buildGraphElements';
+import { applyDemoLayout } from '../../utils/demoLayout';
+import { enrichEdgesWithHandles, positionsFromNodes } from '../../utils/edgeHandles';
+import {
+  buildIncludedIdSet,
+  includedLayoutSignature,
+  nodeSetSignature,
+} from '../../utils/graphAutoLayout';
+import { animateNodesToTargets } from '../../utils/animateGraph';
+import {
+  computeFrameViewport,
+  fitGraphBounds,
+  fitIncludedNodes,
+  getGraphFitOptions,
+  getGraphFrameIds,
+} from '../../utils/graphViewport';
+import {
+  GRAPH_GRID_GAP,
+  GRAPH_SNAP_GRID,
+  snapPositionToGrid,
+} from '../../utils/graphGrid';
+import styles from './PerspectiveGraph.module.css';
+
+const nodeTypes = { perspective: PerspectiveNode };
+const edgeTypes = { route: RouteEdge };
+
+const defaultEdgeOptions = {
+  type: 'route',
+  interactionWidth: 14,
+  markerEnd: {
+    type: MarkerType.ArrowClosed,
+    width: 16,
+    height: 16,
+    color: '#b8c4ce',
+  },
+};
+
+function stripNodeMotion(nodeList) {
+  return nodeList.map((n) => ({
+    ...n,
+    style: { ...n.style, transition: 'none' },
+  }));
+}
+
+export default function PerspectiveGraph({
+  mode,
+  graphContext,
+  layoutEpoch = 0,
+  showInsertPopover = false,
+  contextualDiscovery = null,
+  canvasControls = null,
+  canvasUiVariant = 'v1.5',
+  fillContainer = false,
+  graphSelection = null,
+  hideMetrics = false,
+}) {
+  const savedPositions = useRef(new Map());
+  const canvasRef = useRef(null);
+  const flowRef = useRef(null);
+  const nodesRef = useRef([]);
+  const lastTopologySignature = useRef('');
+  const lastEffectsSignature = useRef('');
+  const lastNodeSetSignature = useRef('');
+  const lastLayoutEpoch = useRef(0);
+  const lastFitKey = useRef('');
+  const animatingRef = useRef(false);
+  const initialRevealDone = useRef(false);
+  const [defaultViewport, setDefaultViewport] = useState(null);
+
+  const buildGraph = useCallback(() => {
+    const ctx = {
+      ...graphContext,
+      enableInspectorSelection: Boolean(graphSelection),
+    };
+    if (mode === 'route-ambiguity') {
+      return buildRouteAmbiguityGraph(ctx);
+    }
+    return buildProgressiveGraph(ctx);
+  }, [mode, graphContext, graphSelection]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  nodesRef.current = nodes;
+
+  const graphEffectKey = useMemo(() => {
+    const inc = graphContext.includedObjects ?? new Set();
+    const vis = graphContext.visibleObjects ?? new Set();
+    const add = graphContext.addableObjects ?? new Set();
+    const exc = graphContext.excludedRelationships ?? new Set();
+    return [
+      mode,
+      layoutEpoch,
+      includedLayoutSignature(
+        inc,
+        graphContext.includedEvents,
+        graphContext.includedMetrics,
+      ),
+      [...exc].sort().join(','),
+      [...vis].sort().join(','),
+      [...add].sort().join(','),
+      graphContext.showDiscoverObjects,
+      graphContext.showDiscoverEvents,
+      graphContext.showDiscoverMetrics,
+      graphContext.showOnlyIncluded,
+      graphContext.pendingObjectId ?? '',
+      [...(graphContext.previewBridgeRelationshipIds ?? [])].sort().join(','),
+      graphContext.previewBridgeWouldCreateCycle ? 'cycle' : 'safe',
+      graphContext.highlightedRelationshipId ?? '',
+    ].join('§');
+  }, [mode, layoutEpoch, graphContext]);
+
+  const getPaneSize = useCallback(() => {
+    const el = canvasRef.current;
+    if (!el) return { width: 900, height: 540 };
+    const { width, height } = el.getBoundingClientRect();
+    return {
+      width: Math.max(width, 320),
+      height: Math.max(height, 400),
+    };
+  }, []);
+
+  const updateViewport = useCallback(
+    (nextNodes, { forceFit = false, topologyChanged = false } = {}) => {
+      const flow = flowRef.current;
+      if (!flow || !nextNodes.length) return;
+
+      const includedObjects = graphContext.includedObjects ?? new Set();
+      const addableObjects = graphContext.addableObjects ?? new Set();
+      const frameIds = getGraphFrameIds(
+        includedObjects,
+        addableObjects,
+        graphContext.pendingObjectId,
+      );
+      const hubRingView =
+        includedObjects.size === 1 &&
+        includedObjects.has('sales-order') &&
+        addableObjects.size > 0;
+
+      const fitKey = `${hubRingView}|${[...frameIds].sort().join(',')}|${nextNodes.length}`;
+      const needsFit = forceFit || topologyChanged || fitKey !== lastFitKey.current;
+      if (!needsFit) return;
+
+      const duration = forceFit || topologyChanged ? 280 : 0;
+      const fitOptions = getGraphFitOptions({
+        includedObjects,
+        addableObjects,
+        cycleActive: graphContext.cycleActive,
+        isResolved: graphContext.isResolved,
+      });
+
+      if (forceFit) {
+        fitGraphBounds(flow, duration);
+      } else if (frameIds.size > 0) {
+        fitIncludedNodes(flow, nextNodes, frameIds, { duration, ...fitOptions });
+      }
+
+      lastFitKey.current = fitKey;
+    },
+    [
+      graphContext.includedObjects,
+      graphContext.addableObjects,
+      graphContext.pendingObjectId,
+      graphContext.cycleActive,
+      graphContext.isResolved,
+    ],
+  );
+
+  const runLayout = useCallback(
+    async (
+      rawNodes,
+      rawEdges,
+      focal,
+      { force = false, topologyChanged = false, relationshipsOnly = false } = {},
+    ) => {
+      const includedIds = buildIncludedIdSet(
+        rawNodes,
+        graphContext.includedObjects ?? new Set(),
+        graphContext.includedEvents,
+        graphContext.includedMetrics,
+      );
+
+      if (relationshipsOnly) {
+        nodesRef.current.forEach((n) => {
+          savedPositions.current.set(n.id, { ...n.position });
+        });
+      }
+
+      if (force) {
+        savedPositions.current.clear();
+      }
+
+      const layoutOptions = {
+        cycleActive: graphContext.cycleActive,
+        isResolved: graphContext.isResolved,
+      };
+
+      let nextNodes = rawNodes;
+      if (force) {
+        nextNodes = applyDemoLayout(
+          rawNodes,
+          focal,
+          rawEdges,
+          includedIds,
+          graphContext.includedObjects,
+          layoutOptions,
+        );
+      }
+
+      nextNodes = nextNodes.map((n) => {
+        const saved = savedPositions.current.get(n.id);
+        return saved ? { ...n, position: { ...saved } } : n;
+      });
+
+      const positioned = positionsFromNodes(nextNodes);
+      setEdges(enrichEdgesWithHandles(rawEdges, positioned));
+
+      const shouldAnimate =
+        initialRevealDone.current &&
+        !relationshipsOnly &&
+        nodesRef.current.length > 0 &&
+        !animatingRef.current;
+
+      const nodesToSet = initialRevealDone.current
+        ? nextNodes
+        : stripNodeMotion(nextNodes);
+
+      if (shouldAnimate) {
+        animatingRef.current = true;
+        setNodes(nodesToSet);
+        await animateNodesToTargets(
+          nodesRef.current,
+          nextNodes,
+          setNodes,
+          480,
+        );
+        animatingRef.current = false;
+      } else {
+        setNodes(nodesToSet);
+      }
+
+      const isInitialReveal = !initialRevealDone.current;
+      if (isInitialReveal) {
+        const includedObjects = graphContext.includedObjects ?? new Set();
+        const addableObjects = graphContext.addableObjects ?? new Set();
+        const frameIds = getGraphFrameIds(
+          includedObjects,
+          addableObjects,
+          graphContext.pendingObjectId,
+        );
+        const hubRingView =
+          includedObjects.size === 1 &&
+          includedObjects.has('sales-order') &&
+          addableObjects.size > 0;
+        const vp = computeFrameViewport(
+          nextNodes,
+          frameIds,
+          getPaneSize(),
+          getGraphFitOptions({
+            includedObjects,
+            addableObjects,
+            cycleActive: graphContext.cycleActive,
+            isResolved: graphContext.isResolved,
+          }),
+        );
+        if (vp) setDefaultViewport(vp);
+        lastFitKey.current = `${hubRingView}|${[...frameIds].sort().join(',')}|${nextNodes.length}`;
+        initialRevealDone.current = true;
+      } else {
+        updateViewport(nextNodes, { forceFit: force, topologyChanged });
+      }
+    },
+    [graphContext, setNodes, setEdges, updateViewport, getPaneSize],
+  );
+
+  useLayoutEffect(() => {
+    const { nodes: rawNodes, edges: e, focalId: focal } = buildGraph();
+    const topology = includedLayoutSignature(
+      graphContext.includedObjects ?? new Set(),
+      graphContext.includedEvents,
+      graphContext.includedMetrics,
+    );
+    const effects = [...(graphContext.excludedRelationships ?? [])].sort().join(',');
+    const topologyChanged = topology !== lastTopologySignature.current;
+    const effectsChanged = effects !== lastEffectsSignature.current;
+    const nodeSig = nodeSetSignature(rawNodes);
+    const nodesChanged = nodeSig !== lastNodeSetSignature.current;
+    const forceLayout = layoutEpoch > lastLayoutEpoch.current;
+
+    if (forceLayout) {
+      savedPositions.current.clear();
+      lastLayoutEpoch.current = layoutEpoch;
+      lastFitKey.current = '';
+    }
+
+    if (topologyChanged) {
+      lastTopologySignature.current = topology;
+      if (!forceLayout) lastFitKey.current = '';
+    }
+    if (effectsChanged) lastEffectsSignature.current = effects;
+    if (nodesChanged) lastNodeSetSignature.current = nodeSig;
+
+    const relationshipsOnly =
+      (effectsChanged || nodesChanged) && !topologyChanged && !forceLayout;
+
+    runLayout(rawNodes, e, focal, {
+      force: forceLayout,
+      topologyChanged: topologyChanged || !initialRevealDone.current,
+      relationshipsOnly,
+    });
+  }, [graphEffectKey, buildGraph, graphContext, layoutEpoch, runLayout]);
+
+  const onInit = useCallback((instance) => {
+    flowRef.current = instance;
+  }, []);
+
+  const flowReady = nodes.length > 0;
+
+  const refreshEdgeHandles = useCallback(
+    (nodeList) => {
+      const list = nodeList ?? nodesRef.current;
+      setEdges((currentEdges) =>
+        enrichEdgesWithHandles(
+          currentEdges,
+          positionsFromNodes(list),
+        ),
+      );
+    },
+    [setEdges],
+  );
+
+  const onNodeDragStop = useCallback(
+    (_event, node) => {
+      const snapped = snapPositionToGrid(node.position);
+      savedPositions.current.set(node.id, snapped);
+      setNodes((current) => {
+        const next = current.map((n) =>
+          n.id === node.id ? { ...n, position: snapped } : n,
+        );
+        refreshEdgeHandles(next);
+        return next;
+      });
+    },
+    [refreshEdgeHandles, setNodes],
+  );
+
+  const onNodeClick = useCallback(
+    (_event, node) => {
+      if (graphSelection?.onSelectNode) {
+        const kind =
+          node.id.startsWith('event-')
+            ? 'event'
+            : node.id.startsWith('metric-')
+              ? 'metric'
+              : 'object';
+        const entityId =
+          kind === 'object'
+            ? node.id
+            : node.id.replace(/^(event|metric)-/, '');
+        graphSelection.onSelectNode({
+          kind,
+          id: entityId,
+          nodeId: node.id,
+          state: node.data?.state ?? 'included',
+        });
+        return;
+      }
+      if (!graphContext.onOpenContextual) return;
+      if (node.id.startsWith('event-') || node.id.startsWith('metric-')) return;
+      if (!graphContext.includedObjects?.has(node.id)) return;
+      graphContext.onOpenContextual(node.id);
+    },
+    [graphContext, graphSelection],
+  );
+
+  const onEdgeClick = useCallback(
+    (_event, edge) => {
+      if (!graphSelection?.onSelectEdge) return;
+      const relId = edge.data?.relId ?? edge.id;
+      const isCycleEdge = Boolean(
+        edge.data?.highlightCycle || edge.data?.showScissors,
+      );
+      graphSelection.onSelectEdge({ id: relId, isCycleEdge });
+    },
+    [graphSelection],
+  );
+
+  const onPaneClick = useCallback(() => {
+    graphSelection?.onSelectCanvas?.();
+    contextualDiscovery?.onClose?.();
+  }, [graphSelection, contextualDiscovery]);
+
+  const showCycleOverlay = graphContext.cycleActive && !graphContext.isResolved;
+  const connectionPrompt = graphContext.connectionPrompt;
+  const showConnectionOverlay = Boolean(
+    connectionPrompt?.paths?.length && !showCycleOverlay,
+  );
+  const connectionObjectName =
+    connectionPrompt?.addedId &&
+    (graphContext.objectNames?.[connectionPrompt.addedId] ??
+      connectionPrompt.addedId);
+
+  const expansionAnchorId = graphContext.expansionAnchorId;
+  const focalId =
+    nodes.find((n) => n.data?.isHub)?.id ??
+    expansionAnchorId ??
+    [...(graphContext.includedObjects ?? [])][0];
+  const focalLabel = showCycleOverlay
+    ? 'Resolve cycle'
+    : graphContext.discoveryMode === 'contextual' && contextualDiscovery?.selection
+      ? `Selected · ${nodes.find((n) => n.id === contextualDiscovery.selection.objectId)?.data?.label ?? ''}`
+      : null;
+
+  const rerunLayout = useCallback(() => {
+    savedPositions.current.clear();
+    lastFitKey.current = '';
+    const { nodes: rawNodes, edges: e, focalId: focal } = buildGraph();
+    runLayout(rawNodes, e, focal, { force: true, topologyChanged: true });
+  }, [buildGraph, runLayout]);
+
+  return (
+    <div className={`${styles.wrap} ${fillContainer ? styles.wrapFill : ''}`}>
+      <MakeGridBackdrop />
+
+      <div
+        ref={canvasRef}
+        className={`${styles.canvas} ${fillContainer ? styles.canvasFill : ''} ${canvasUiVariant === 'v2' ? styles.canvasV2 : ''} ${showCycleOverlay ? styles.canvasRouteResolve : ''}`}
+      >
+        <div className={styles.canvasFlow}>
+          <div className={styles.canvasTopLeft}>
+            {showInsertPopover && graphContext.onAddObject && !showCycleOverlay && (
+              <GraphInsertPopover
+                onAddObject={graphContext.onAddObject}
+                onAddEvent={graphContext.onAddEvent}
+                onAddMetric={hideMetrics ? undefined : graphContext.onAddMetric}
+                placeholder={
+                  hideMetrics ? 'Search objects and events…' : undefined
+                }
+                showLabel={canvasUiVariant === 'v2'}
+              />
+            )}
+            {focalLabel && (
+              <span className={styles.focalTag}>{focalLabel}</span>
+            )}
+          </div>
+
+          {canvasControls?.discovery && (
+            <div
+              className={`${styles.canvasTopRight} ${hideMetrics ? styles.canvasTopRightCompact : ''}`}
+            >
+              <GraphCanvasControls
+                discovery={canvasControls.discovery}
+                variant={canvasControls.variant ?? canvasUiVariant}
+                hideMetrics={hideMetrics}
+              />
+            </div>
+          )}
+
+          {showCycleOverlay && <GraphCycleOverlay />}
+          {showConnectionOverlay && (
+            <GraphConnectionOverlay
+              pathCount={connectionPrompt.paths.length}
+              objectName={connectionObjectName}
+            />
+          )}
+          {flowReady && (
+            <ReactFlowProvider>
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onNodeClick={onNodeClick}
+                onEdgeClick={onEdgeClick}
+                onNodeDragStop={onNodeDragStop}
+                onPaneClick={onPaneClick}
+                nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
+                defaultEdgeOptions={defaultEdgeOptions}
+                nodeOrigin={[0.5, 0.34]}
+                defaultViewport={defaultViewport ?? undefined}
+                onInit={onInit}
+                minZoom={0.55}
+                maxZoom={1.4}
+                proOptions={{ hideAttribution: true }}
+                nodesDraggable
+                nodesConnectable={false}
+                elementsSelectable
+                panOnDrag
+                selectionOnDrag={false}
+                snapToGrid
+                snapGrid={GRAPH_SNAP_GRID}
+              >
+                <Background
+                  gap={GRAPH_GRID_GAP}
+                  size={1}
+                  color="#e8ecf0"
+                  variant="lines"
+                />
+                <Controls showInteractive={false} />
+              </ReactFlow>
+              {contextualDiscovery && (
+                <ContextualDiscoveryMenu
+                  selection={contextualDiscovery.selection}
+                  counts={contextualDiscovery.counts}
+                  onReveal={contextualDiscovery.onReveal}
+                  onClose={contextualDiscovery.onClose}
+                />
+              )}
+            </ReactFlowProvider>
+          )}
+        </div>
+
+        {canvasUiVariant !== 'v2' && (
+          <div className={styles.hud}>
+            {canvasControls?.showViewToggle && canvasControls?.onToggleShowOnly && (
+              <label className={styles.hudToggle}>
+                <input
+                  type="checkbox"
+                  checked={canvasControls.showOnlyIncluded}
+                  onChange={(e) => canvasControls.onToggleShowOnly(e.target.checked)}
+                />
+                <span className={styles.hudToggleTrack} />
+                Show only included
+              </label>
+            )}
+            <button type="button" className={styles.hudBtn} onClick={rerunLayout}>
+              ⊞ Auto layout
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

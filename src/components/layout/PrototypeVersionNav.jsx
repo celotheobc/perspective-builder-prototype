@@ -1,0 +1,28 @@
+import styles from './PrototypeVersionNav.module.css';
+
+const VERSIONS = [
+  { id: 'cover', short: '⌂', title: 'Prototype cover' },
+  { id: 'v1', short: 'v1', title: 'Graph-first prototype' },
+  { id: 'v2', short: 'v2', title: 'Asset layout exploration' },
+  { id: 'v3', short: 'v3', title: 'Create from Context Model' },
+];
+
+export default function PrototypeVersionPicker({ version, onVersionChange }) {
+  return (
+    <div className={styles.picker} role="group" aria-label="Prototype version">
+      {VERSIONS.map((v) => (
+        <button
+          key={v.id}
+          type="button"
+          className={version === v.id ? styles.pickerActive : styles.pickerBtn}
+          aria-current={version === v.id ? 'true' : undefined}
+          aria-label={`Perspective Builder ${v.short} — ${v.title}`}
+          title={`${v.short} — ${v.title}`}
+          onClick={() => onVersionChange(v.id)}
+        >
+          {v.short}
+        </button>
+      ))}
+    </div>
+  );
+}
