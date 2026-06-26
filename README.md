@@ -2,6 +2,12 @@
 
 Interactive React prototype exploring a **graph-first** Celonis Perspective configuration experience inside the standard Semantic Types asset page framework.
 
+## Play online
+
+**https://celotheobc.github.io/perspective-builder-prototype/**
+
+(Deploys automatically from `main` via GitHub Pages.)
+
 ## Important: do not open `index.html` directly
 
 Double-clicking `index.html` will show a **blank page**. The app uses React and must be served by a local dev server.
