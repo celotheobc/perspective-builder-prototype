@@ -25,8 +25,22 @@
   justify-content: space-between;
   gap: 8px;
   padding: 0 8px;
-  border-bottom: 1px solid var(--celonis-border);
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--celonis-border);
+  z-index: 1;
+  pointer-events: none;
 }
 
 .tabs {
@@ -34,6 +48,8 @@
   gap: 2px;
   overflow-x: auto;
   flex: 1;
+  position: relative;
+  z-index: 2;
 }
 
 .tab,
@@ -50,12 +66,16 @@
   align-items: center;
   gap: 6px;
   border-bottom: 2px solid transparent;
+  position: relative;
+  z-index: 2;
 }
 
 .tabActive {
   color: var(--celonis-primary);
   font-weight: 600;
   border-bottom-color: var(--celonis-primary);
+  z-index: 3;
+  margin-bottom: -1px;
 }
 
 .badge {
@@ -74,6 +94,8 @@
   font-size: 12px;
   color: var(--celonis-text-muted);
   padding: 8px;
+  position: relative;
+  z-index: 2;
 }
 
 .body {

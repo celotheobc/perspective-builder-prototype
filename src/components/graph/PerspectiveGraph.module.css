@@ -62,6 +62,15 @@
   transition: none !important;
 }
 
+/* Perspective builder: nodes are click-to-select, not drag-first */
+.canvasSelectable :global(.react-flow__node) {
+  cursor: pointer;
+}
+
+.canvasSelectable :global(.react-flow__node.dragging) {
+  cursor: grabbing;
+}
+
 .canvas :global(.react-flow__edge-path) {
   transition: d 0.48s cubic-bezier(0.4, 0, 0.2, 1);
 }

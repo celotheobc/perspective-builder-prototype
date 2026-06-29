@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import InsertSearchPanel from '../configuration/InsertSearchPanel';
+import CreateRelationshipModal from './CreateRelationshipModal';
 import styles from './GraphInsertPopover.module.css';
 
 const DEFAULT_HINT =
@@ -39,9 +40,14 @@ export default function GraphInsertPopover({
   placeholder,
 }) {
   const [open, setOpen] = useState(false);
+  const [createRelationshipOpen, setCreateRelationshipOpen] = useState(false);
   const rootRef = useRef(null);
 
-  const close = useCallback(() => setOpen(false), []);
+  const close = useCallback(() => {
+    setCreateRelationshipOpen(false);
+    setOpen(false);
+  }, []);
+  const closeCreateRelationship = useCallback(() => setCreateRelationshipOpen(false), []);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -53,7 +59,13 @@ export default function GraphInsertPopover({
     };
 
     const onKey = (e) => {
-      if (e.key === 'Escape') close();
+      if (e.key === 'Escape') {
+        if (createRelationshipOpen) {
+          closeCreateRelationship();
+          return;
+        }
+        close();
+      }
     };
 
     document.addEventListener('mousedown', onDocClick);
@@ -62,7 +74,7 @@ export default function GraphInsertPopover({
       document.removeEventListener('mousedown', onDocClick);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open, close]);
+  }, [open, createRelationshipOpen, close, closeCreateRelationship]);
 
   const resolvedHint =
     hint !== undefined
@@ -142,8 +154,22 @@ export default function GraphInsertPopover({
             placeholder={resolvedPlaceholder}
             flatResults={flatResults || showLabel}
           />
+          <div className={styles.createRow}>
+            <button
+              type="button"
+              className={styles.createBtn}
+              onClick={() => setCreateRelationshipOpen(true)}
+            >
+              Create Relationship
+            </button>
+          </div>
         </div>
       )}
+
+      <CreateRelationshipModal
+        open={createRelationshipOpen}
+        onClose={closeCreateRelationship}
+      />
     </div>
   );
 }

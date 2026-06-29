@@ -201,7 +201,6 @@ export default function PerspectiveRefineView({
                 onSelectObject={handleSelectObject}
                 onSelectEvent={selectEvent}
                 onSelectIssue={selectIssue}
-                onHighlightRelationship={setHighlightedRelationshipId}
               />
             }
           />

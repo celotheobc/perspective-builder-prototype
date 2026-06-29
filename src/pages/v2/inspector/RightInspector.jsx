@@ -34,7 +34,7 @@ function CanvasInspector({ progressive, validationStatus }) {
 
   return (
     <>
-      <InspectorSection title="About this perspective">
+      <InspectorSection>
         <InspectorRow label="Name">{assetMetadata.title}</InspectorRow>
         <InspectorRow label="Status">{assetMetadata.status}</InspectorRow>
         <InspectorRow label="Validation">
@@ -91,6 +91,14 @@ function NavigableRelationshipList({ items, onSelect }) {
   );
 }
 
+function OpenInGraphButton() {
+  return (
+    <InspectorButton onClick={() => {}}>
+      Open in graph
+    </InspectorButton>
+  );
+}
+
 function ObjectInspector({ id, state, progressive, onSelectRelationship }) {
   const obj = objects.find((o) => o.id === id);
   const included = progressive.includedObjects.has(id);
@@ -117,7 +125,7 @@ function ObjectInspector({ id, state, progressive, onSelectRelationship }) {
 
   return (
     <>
-      <InspectorSection title="In this perspective">
+      <InspectorSection>
         <InspectorRow label="Name">{obj.name}</InspectorRow>
         <InspectorRow label="Status">
           {included ? 'Included' : state === 'ghost' ? 'Suggested' : 'Not included'}
@@ -149,6 +157,7 @@ function ObjectInspector({ id, state, progressive, onSelectRelationship }) {
             Remove from perspective
           </InspectorButton>
         )}
+        <OpenInGraphButton />
       </InspectorActions>
     </>
   );
@@ -182,6 +191,7 @@ function EventInspector({ id, state, progressive }) {
             Remove event
           </InspectorButton>
         )}
+        <OpenInGraphButton />
       </InspectorActions>
     </>
   );

@@ -339,6 +339,7 @@
 /* Dimmed */
 .dimmed {
   opacity: 0.4;
+  cursor: default;
 }
 
 .dimmed .label {
@@ -346,7 +347,8 @@
 }
 
 /* Selection accents */
-.refocusable {
+.refocusable,
+.selectable {
   cursor: pointer;
 }
 

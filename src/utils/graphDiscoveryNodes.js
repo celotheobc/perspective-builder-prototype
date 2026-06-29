@@ -1,4 +1,5 @@
 import { eventSources, metrics, NODE_KINDS } from '../data/mockData';
+import { inspectorNodeDataFlags } from './graphInspectorSelection';
 
 export function appendDiscoveryEventNodes(nodes, nodeIds, edges, ctx) {
   if (!ctx.showDiscoverEvents) return;
@@ -26,6 +27,7 @@ export function appendDiscoveryEventNodes(nodes, nodeIds, edges, ctx) {
           state: included ? 'included' : 'ghost',
           showPlus: addable,
           onPlusClick: () => ctx.onAddEvent?.(eventId),
+          ...inspectorNodeDataFlags(nodeId, NODE_KINDS.EVENT_SOURCE, ctx),
         },
       });
       nodeIds.add(nodeId);

@@ -13,6 +13,10 @@ import {
   appendDiscoveryEventNodes,
   appendDiscoveryMetricNodes,
 } from './graphDiscoveryNodes';
+import {
+  getInspectorEdgeSelected,
+  inspectorNodeDataFlags,
+} from './graphInspectorSelection';
 
 function objectLabel(id) {
   return objects.find((o) => o.id === id)?.name ?? id;
@@ -50,28 +54,6 @@ function edgeIsPotential(r, ctx) {
   return !meta?.insertOnly && !meta?.hiddenFromDiscovery;
 }
 
-function getInspectorNodeSelected(nodeId, kind, selection) {
-  if (!selection) return false;
-  if (selection.type === 'object' && kind === NODE_KINDS.OBJECT && selection.id === nodeId) {
-    return true;
-  }
-  if (selection.type === 'event' && kind === NODE_KINDS.EVENT_SOURCE) {
-    return selection.id === nodeId.replace(/^event-/, '');
-  }
-  if (selection.type === 'metric' && kind === NODE_KINDS.METRIC) {
-    return selection.id === nodeId.replace(/^metric-/, '');
-  }
-  return false;
-}
-
-function getInspectorEdgeSelected(relId, selection) {
-  if (!selection || !relId) return false;
-  return (
-    (selection.type === 'relationship' || selection.type === 'cycleEdge') &&
-    selection.id === relId
-  );
-}
-
 function buildObjectNode(id, ctx, positions, focalId) {
   const obj = objects.find((o) => o.id === id);
   if (!obj) return null;
@@ -100,12 +82,7 @@ function buildObjectNode(id, ctx, positions, focalId) {
       isSelectedContext:
         ctx.discoveryMode === 'contextual' &&
         ctx.contextualSelection?.objectId === id,
-      isInspectorSelected: getInspectorNodeSelected(
-        id,
-        NODE_KINDS.OBJECT,
-        ctx.inspectorSelection,
-      ),
-      inspectorSelectionMode: Boolean(ctx.enableInspectorSelection),
+      ...inspectorNodeDataFlags(id, NODE_KINDS.OBJECT, ctx),
     },
   };
 }
@@ -226,6 +203,7 @@ export function buildProgressiveGraph(ctx) {
           kind: NODE_KINDS.EVENT_SOURCE,
           state: 'included',
           onPlusClick: () => ctx.onAddEvent?.(link.eventId),
+          ...inspectorNodeDataFlags(nodeId, NODE_KINDS.EVENT_SOURCE, ctx),
         },
       });
       nodeIds.add(nodeId);
@@ -307,11 +285,7 @@ export function buildRouteAmbiguityGraph(ctx) {
         state: ctx.dimmedObjectIds?.has(id) ? 'dimmed' : 'included',
         isHub: false,
         showIncludedBadge: true,
-        isInspectorSelected: getInspectorNodeSelected(
-          id,
-          NODE_KINDS.OBJECT,
-          ctx.inspectorSelection,
-        ),
+        ...inspectorNodeDataFlags(id, NODE_KINDS.OBJECT, ctx),
       },
     });
   }

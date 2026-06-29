@@ -45,7 +45,7 @@ export default function StudioL0Nav({ onVersionChange }) {
       </button>
       <PrototypeVersionPicker version="v3" onVersionChange={onVersionChange} />
       <button type="button" className={styles.avatar} aria-label="Profile" title="Profile">
-        MK
+        BC
       </button>
     </nav>
   );

@@ -445,7 +445,7 @@ export default function PerspectiveGraph({
 
       <div
         ref={canvasRef}
-        className={`${styles.canvas} ${fillContainer ? styles.canvasFill : ''} ${canvasUiVariant === 'v2' ? styles.canvasV2 : ''} ${showCycleOverlay ? styles.canvasRouteResolve : ''}`}
+        className={`${styles.canvas} ${fillContainer ? styles.canvasFill : ''} ${canvasUiVariant === 'v2' ? styles.canvasV2 : ''} ${showCycleOverlay ? styles.canvasRouteResolve : ''} ${graphSelection ? styles.canvasSelectable : ''}`}
       >
         <div className={styles.canvasFlow}>
           <div className={styles.canvasTopLeft}>

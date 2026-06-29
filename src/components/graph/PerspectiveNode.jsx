@@ -9,7 +9,7 @@ const SIDES = [
   { position: Position.Left, id: 'left' },
 ];
 
-function NodeIcon({ kind, isHub }) {
+function NodeIcon({ kind }) {
   if (kind === 'metric') {
     return (
       <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden>
@@ -35,14 +35,6 @@ function NodeIcon({ kind, isHub }) {
         <rect x="3" y="5" width="8" height="6" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2" />
         <rect x="13" y="13" width="8" height="6" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2" />
         <path d="M11 8h2M11 16h2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  if (isHub) {
-    return (
-      <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden>
-        <rect x="5" y="5" width="14" height="14" rx="2" fill="none" stroke="currentColor" strokeWidth="2" />
-        <rect x="8" y="8" width="8" height="8" rx="1" fill="currentColor" opacity="0.5" />
       </svg>
     );
   }
@@ -140,6 +132,9 @@ function PerspectiveNodeComponent({ data }) {
         stateClass,
         isHub ? styles.hub : '',
         canRefocus ? styles.refocusable : '',
+        inspectorSelectionMode && state !== 'dimmed' && !explorerUnselectable
+          ? styles.selectable
+          : '',
         isSelectedContext ? styles.contextSelected : '',
         isInspectorSelected ? styles.inspectorSelected : '',
         visualVariant === 'explorer' ? styles.explorer : '',
@@ -214,7 +209,7 @@ function PerspectiveNodeComponent({ data }) {
           <div className={styles.puckTop}>
             {cmAssetPicker ? (
               <>
-                {!pickerOverlay && <NodeIcon kind={kind} isHub={isHub} />}
+                {!pickerOverlay && <NodeIcon kind={kind} />}
                 {pickerOverlay === 'plus' && (
                   <span
                     className={`${styles.cmPickerPlus} ${styles.cmPickerRaised}`}
@@ -238,7 +233,7 @@ function PerspectiveNodeComponent({ data }) {
                 )}
               </>
             ) : (
-              <NodeIcon kind={kind} isHub={isHub} />
+              <NodeIcon kind={kind} />
             )}
             {showPlus && (
               <button

@@ -102,3 +102,29 @@
 .popoverHeader {
   min-width: 320px;
 }
+
+.createRow {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--celonis-border);
+}
+
+.createBtn {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--celonis-border);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--celonis-primary);
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    background var(--transition);
+}
+
+.createBtn:hover {
+  border-color: var(--celonis-primary);
+  background: var(--celonis-primary-light);
+}

@@ -70,7 +70,6 @@ export default function BottomPanelV3({
   onSelectObject,
   onSelectEvent,
   onSelectIssue,
-  onHighlightRelationship,
 }) {
   const selectedRowId =
     selection?.type === 'relationship' || selection?.type === 'cycleEdge'
@@ -143,7 +142,6 @@ export default function BottomPanelV3({
                 selectedId={selectedRowId}
                 empty="No relationships included yet — add objects on the graph."
                 onSelectRow={(row) => onSelectRelationship(row.id, false)}
-                onHoverRow={onHighlightRelationship}
               />
             )}
 
