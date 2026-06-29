@@ -334,8 +334,25 @@ export default function PerspectiveBuilderV3({ onVersionChange }) {
   const activeTab = workspaceTabs.find((tab) => tab.id === activeTabId);
   const contextState = contextByTab[CONTEXT_BROWSE_TAB_ID] ?? createEmptyContextState();
 
+  const focusContextModel = useCallback(() => {
+    setWorkspaceTabs((tabs) => {
+      const browseTab = tabs.find((tab) => tab.id === CONTEXT_BROWSE_TAB_ID);
+      if (browseTab) return tabs;
+      return [createBrowseTab(), ...tabs];
+    });
+    setContextByTab((prev) => ({
+      ...prev,
+      [CONTEXT_BROWSE_TAB_ID]: prev[CONTEXT_BROWSE_TAB_ID] ?? createEmptyContextState(),
+    }));
+    setActiveTabId(CONTEXT_BROWSE_TAB_ID);
+  }, [setWorkspaceTabs, setContextByTab, setActiveTabId]);
+
   return (
-    <DemoTourProvider activeTab={activeTab} contextState={contextState}>
+    <DemoTourProvider
+      activeTab={activeTab}
+      contextState={contextState}
+      onFocusContextModel={focusContextModel}
+    >
       <PerspectiveBuilderV3Shell
         onVersionChange={onVersionChange}
         workspaceTabs={workspaceTabs}

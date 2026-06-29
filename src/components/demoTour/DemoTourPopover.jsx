@@ -45,6 +45,7 @@ export default function DemoTourPopover() {
     scratchProgress,
     contextProgress,
     markFinished,
+    focusContextModel,
   } = useDemoTour();
 
   const steps = route === TOUR_ROUTES.CONTEXT ? CONTEXT_STEPS : SCRATCH_STEPS;
@@ -110,7 +111,10 @@ export default function DemoTourPopover() {
               className={`${styles.routeTab} ${
                 route === TOUR_ROUTES.CONTEXT ? styles.routeTabActive : ''
               }`}
-              onClick={() => setRoute(TOUR_ROUTES.CONTEXT)}
+              onClick={() => {
+                setRoute(TOUR_ROUTES.CONTEXT);
+                focusContextModel();
+              }}
             >
               Context Model
             </button>

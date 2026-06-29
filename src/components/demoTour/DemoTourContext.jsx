@@ -15,6 +15,7 @@ export function DemoTourProvider({
   children,
   activeTab,
   contextState,
+  onFocusContextModel,
 }) {
   const [open, setOpen] = useState(false);
   const [route, setRoute] = useState('scratch');
@@ -79,6 +80,10 @@ export function DemoTourProvider({
     mergeMilestone,
   });
 
+  const focusContextModel = useCallback(() => {
+    onFocusContextModel?.();
+  }, [onFocusContextModel]);
+
   const value = useMemo(
     () => ({
       open,
@@ -89,9 +94,19 @@ export function DemoTourProvider({
       markEvent,
       markFinished,
       mergeMilestone,
+      focusContextModel,
       ...progress,
     }),
-    [open, route, markEvent, markFinished, mergeMilestone, setRefineState, progress],
+    [
+      open,
+      route,
+      markEvent,
+      markFinished,
+      mergeMilestone,
+      setRefineState,
+      focusContextModel,
+      progress,
+    ],
   );
 
   return (
