@@ -101,7 +101,7 @@ export default function DemoTourPopover() {
               }`}
               onClick={() => setRoute(TOUR_ROUTES.SCRATCH)}
             >
-              From scratch
+              Build from scratch
             </button>
             <button
               type="button"

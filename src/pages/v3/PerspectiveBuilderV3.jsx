@@ -269,6 +269,7 @@ function PerspectiveBuilderV3Shell({
     if (tab.type === 'refine' && tab.payload) {
       return (
         <PerspectiveRefineView
+          key={tab.refineKey ?? tab.id}
           perspectiveName={tab.payload.name}
           initialObjects={tab.payload.objects}
           initialEvents={tab.payload.events}

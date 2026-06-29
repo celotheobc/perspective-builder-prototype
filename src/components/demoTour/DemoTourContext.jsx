@@ -1,7 +1,15 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useDemoTourProgress } from './useDemoTourProgress';
 
 const DemoTourContext = createContext(null);
+const THEOBOT_AUTO_OPEN_MS = 1300;
 
 export function DemoTourProvider({
   children,
@@ -16,6 +24,11 @@ export function DemoTourProvider({
     contextPerspectiveCreated: false,
   });
   const [milestones, setMilestones] = useState({});
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setOpen(true), THEOBOT_AUTO_OPEN_MS);
+    return () => window.clearTimeout(id);
+  }, []);
 
   const markEvent = useCallback((key) => {
     setEvents((prev) => ({ ...prev, [key]: true }));

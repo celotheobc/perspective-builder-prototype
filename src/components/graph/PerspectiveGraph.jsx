@@ -87,17 +87,21 @@ export default function PerspectiveGraph({
   const animatingRef = useRef(false);
   const initialRevealDone = useRef(false);
   const [defaultViewport, setDefaultViewport] = useState(null);
+  const graphContextRef = useRef(graphContext);
+  graphContextRef.current = graphContext;
+  const graphSelectionRef = useRef(graphSelection);
+  graphSelectionRef.current = graphSelection;
 
   const buildGraph = useCallback(() => {
     const ctx = {
-      ...graphContext,
-      enableInspectorSelection: Boolean(graphSelection),
+      ...graphContextRef.current,
+      enableInspectorSelection: Boolean(graphSelectionRef.current),
     };
     if (mode === 'route-ambiguity') {
       return buildRouteAmbiguityGraph(ctx);
     }
     return buildProgressiveGraph(ctx);
-  }, [mode, graphContext, graphSelection]);
+  }, [mode]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -128,8 +132,28 @@ export default function PerspectiveGraph({
       [...(graphContext.previewBridgeRelationshipIds ?? [])].sort().join(','),
       graphContext.previewBridgeWouldCreateCycle ? 'cycle' : 'safe',
       graphContext.highlightedRelationshipId ?? '',
+      graphContext.inspectorSelection?.type ?? '',
+      graphContext.inspectorSelection?.id ?? '',
     ].join('§');
-  }, [mode, layoutEpoch, graphContext]);
+  }, [
+    mode,
+    layoutEpoch,
+    graphContext.includedObjects,
+    graphContext.includedEvents,
+    graphContext.includedMetrics,
+    graphContext.visibleObjects,
+    graphContext.addableObjects,
+    graphContext.excludedRelationships,
+    graphContext.showDiscoverObjects,
+    graphContext.showDiscoverEvents,
+    graphContext.showDiscoverMetrics,
+    graphContext.showOnlyIncluded,
+    graphContext.pendingObjectId,
+    graphContext.previewBridgeRelationshipIds,
+    graphContext.previewBridgeWouldCreateCycle,
+    graphContext.highlightedRelationshipId,
+    graphContext.inspectorSelection,
+  ]);
 
   const getPaneSize = useCallback(() => {
     const el = canvasRef.current;
@@ -146,12 +170,13 @@ export default function PerspectiveGraph({
       const flow = flowRef.current;
       if (!flow || !nextNodes.length) return;
 
-      const includedObjects = graphContext.includedObjects ?? new Set();
-      const addableObjects = graphContext.addableObjects ?? new Set();
+      const ctx = graphContextRef.current;
+      const includedObjects = ctx.includedObjects ?? new Set();
+      const addableObjects = ctx.addableObjects ?? new Set();
       const frameIds = getGraphFrameIds(
         includedObjects,
         addableObjects,
-        graphContext.pendingObjectId,
+        ctx.pendingObjectId,
       );
       const hubRingView =
         includedObjects.size === 1 &&
@@ -166,8 +191,8 @@ export default function PerspectiveGraph({
       const fitOptions = getGraphFitOptions({
         includedObjects,
         addableObjects,
-        cycleActive: graphContext.cycleActive,
-        isResolved: graphContext.isResolved,
+        cycleActive: ctx.cycleActive,
+        isResolved: ctx.isResolved,
       });
 
       if (forceFit) {
@@ -178,13 +203,7 @@ export default function PerspectiveGraph({
 
       lastFitKey.current = fitKey;
     },
-    [
-      graphContext.includedObjects,
-      graphContext.addableObjects,
-      graphContext.pendingObjectId,
-      graphContext.cycleActive,
-      graphContext.isResolved,
-    ],
+    [],
   );
 
   const runLayout = useCallback(
@@ -194,11 +213,12 @@ export default function PerspectiveGraph({
       focal,
       { force = false, topologyChanged = false, relationshipsOnly = false } = {},
     ) => {
+      const ctx = graphContextRef.current;
       const includedIds = buildIncludedIdSet(
         rawNodes,
-        graphContext.includedObjects ?? new Set(),
-        graphContext.includedEvents,
-        graphContext.includedMetrics,
+        ctx.includedObjects ?? new Set(),
+        ctx.includedEvents,
+        ctx.includedMetrics,
       );
 
       if (relationshipsOnly) {
@@ -212,8 +232,8 @@ export default function PerspectiveGraph({
       }
 
       const layoutOptions = {
-        cycleActive: graphContext.cycleActive,
-        isResolved: graphContext.isResolved,
+        cycleActive: ctx.cycleActive,
+        isResolved: ctx.isResolved,
       };
 
       let nextNodes = rawNodes;
@@ -223,7 +243,7 @@ export default function PerspectiveGraph({
           focal,
           rawEdges,
           includedIds,
-          graphContext.includedObjects,
+          ctx.includedObjects,
           layoutOptions,
         );
       }
@@ -262,12 +282,12 @@ export default function PerspectiveGraph({
 
       const isInitialReveal = !initialRevealDone.current;
       if (isInitialReveal) {
-        const includedObjects = graphContext.includedObjects ?? new Set();
-        const addableObjects = graphContext.addableObjects ?? new Set();
+        const includedObjects = ctx.includedObjects ?? new Set();
+        const addableObjects = ctx.addableObjects ?? new Set();
         const frameIds = getGraphFrameIds(
           includedObjects,
           addableObjects,
-          graphContext.pendingObjectId,
+          ctx.pendingObjectId,
         );
         const hubRingView =
           includedObjects.size === 1 &&
@@ -280,8 +300,8 @@ export default function PerspectiveGraph({
           getGraphFitOptions({
             includedObjects,
             addableObjects,
-            cycleActive: graphContext.cycleActive,
-            isResolved: graphContext.isResolved,
+            cycleActive: ctx.cycleActive,
+            isResolved: ctx.isResolved,
           }),
         );
         if (vp) setDefaultViewport(vp);
@@ -291,17 +311,23 @@ export default function PerspectiveGraph({
         updateViewport(nextNodes, { forceFit: force, topologyChanged });
       }
     },
-    [graphContext, setNodes, setEdges, updateViewport, getPaneSize],
+    [setNodes, setEdges, updateViewport, getPaneSize],
   );
 
+  const buildGraphRef = useRef(buildGraph);
+  buildGraphRef.current = buildGraph;
+  const runLayoutRef = useRef(runLayout);
+  runLayoutRef.current = runLayout;
+
   useLayoutEffect(() => {
-    const { nodes: rawNodes, edges: e, focalId: focal } = buildGraph();
+    const ctx = graphContextRef.current;
+    const { nodes: rawNodes, edges: e, focalId: focal } = buildGraphRef.current();
     const topology = includedLayoutSignature(
-      graphContext.includedObjects ?? new Set(),
-      graphContext.includedEvents,
-      graphContext.includedMetrics,
+      ctx.includedObjects ?? new Set(),
+      ctx.includedEvents,
+      ctx.includedMetrics,
     );
-    const effects = [...(graphContext.excludedRelationships ?? [])].sort().join(',');
+    const effects = [...(ctx.excludedRelationships ?? [])].sort().join(',');
     const topologyChanged = topology !== lastTopologySignature.current;
     const effectsChanged = effects !== lastEffectsSignature.current;
     const nodeSig = nodeSetSignature(rawNodes);
@@ -324,12 +350,12 @@ export default function PerspectiveGraph({
     const relationshipsOnly =
       (effectsChanged || nodesChanged) && !topologyChanged && !forceLayout;
 
-    runLayout(rawNodes, e, focal, {
+    runLayoutRef.current(rawNodes, e, focal, {
       force: forceLayout,
       topologyChanged: topologyChanged || !initialRevealDone.current,
       relationshipsOnly,
     });
-  }, [graphEffectKey, buildGraph, graphContext, layoutEpoch, runLayout]);
+  }, [graphEffectKey, layoutEpoch]);
 
   const onInit = useCallback((instance) => {
     flowRef.current = instance;

@@ -6,101 +6,101 @@ export const TOUR_ROUTES = {
 export const SCRATCH_STEPS = [
   {
     id: 'intro',
-    text: 'This is the Context Model graph. From here there are two ways to create a new Perspective: from scratch, or by choosing existing assets from the Context Model.',
+    text: 'This is the Context Model. From here there are two ways to create a new Perspective: start from scratch, or to choose the O+Es from the CM graph.',
   },
   {
     id: 'create-perspective',
-    text: 'From scratch: locate Perspectives in the navigation tree and click the small + icon to create an empty perspective.',
+    text: 'To start from scratch, locate Perspectives in the navigation tree and click the + icon to create an empty Perspective.',
   },
   {
     id: 'tab-opened',
-    text: 'A new tab opens with your empty perspective.',
+    text: "Good. We now have an empty Perspective. Let's build it up one step at a time.",
   },
   {
     id: 'seed-sales-order',
-    text: 'Choose a seed object — add Sales Order by clicking the suggested chip (or search for it).',
+    text: 'Choose a starting object. Add Sales Order by clicking the suggested chip, or search for it directly.',
   },
   {
     id: 'ghosts-explained',
-    text: 'Sales Order has been added. Ghost nodes on the canvas suggest additions to this perspective.',
+    text: 'Sales Order has been added. The faded nodes suggest other semantic types that can be connected to it in this Perspective. These can be hidden using the top right toggle.',
   },
   {
     id: 'inspector-contextual',
-    text: 'The right panel is contextual — it shows information about your selection. Click Sales Order on the graph or in the table below.',
+    text: 'The panel on the right follows your selection. Try clicking Sales Order on the graph or in the Objects tab below.',
   },
   {
     id: 'canvas-focus',
-    text: 'Click the main canvas again to unselect and focus back on the perspective.',
+    text: 'Click back onto the canvas to clear the selection and return to the Perspective itself.',
   },
   {
     id: 'add-customer',
-    text: 'Add Customer by clicking the ghost + on the canvas.',
+    text: 'Add the Customer Object type by using the suggested connection on the canvas.',
   },
   {
     id: 'add-delivery-item',
-    text: 'Now add Delivery Item.',
+    text: 'Next, add Delivery Item.',
   },
   {
     id: 'add-delivery',
-    text: 'Now add Delivery — this creates a cycle that must be fixed.',
+    text: "Now add Delivery. This introduces a cycle, which we'll need to resolve.",
   },
   {
     id: 'resolve-cycle',
-    text: 'Choose which relationship to remove to resolve the cycle. Hover options in the right panel to preview the change, then remove one.',
+    text: 'Perspectives require a single valid path between entities. Hover the options in the right panel to preview the outcome, then remove one relationship.',
   },
   {
     id: 'add-disconnected',
-    text: 'Back in suggestion mode. Click + Add to list all available object types, then choose Accounts Hub.',
+    text: "We're back in editing mode. Click + Add to browse all available object types, then choose Accounts Hub.",
   },
   {
     id: 'vendor-hub-path',
-    text: 'Choose any connection path for Accounts Hub. If your choice creates a cycle, resolve it as before.',
+    text: 'Accounts Hub can be connected in several ways. Choose a path that makes sense for this Perspective. If it introduces a cycle, resolve it as before.',
   },
   {
     id: 'event-discovery',
-    text: 'In Show suggestions, uncheck Objects and check Event Sources.',
+    text: 'In Show suggestions, turn off Objects and turn on Event Sources.',
   },
   {
     id: 'add-events',
-    text: 'Add any event sources you wish.',
+    text: 'Add an Event Source to see it appear on the canvas.',
   },
   {
     id: 'inventory-tabs',
-    text: 'Open the Included Objects tab under the graph. Click an object name to highlight it on the graph. Try Events and Relationships too.',
+    text: 'Open the Included Objects tab beneath the graph. Click an object to highlight it on the canvas. Then try Events and Relationships as well.',
   },
   {
     id: 'finish',
-    text: "You're done exploring the from-scratch flow.",
+    text: "That's the complete build-from-scratch workflow: start with a scope, add context, resolve ambiguity, and refine as needed.",
   },
 ];
 
 export const CONTEXT_STEPS = [
   {
     id: 'cm-intro',
-    text: 'Sometimes it is easier to create a perspective after browsing what is available in the Context Model. This route is built around that.',
+    text: "Sometimes it's easier to start by exploring what's already available in the Context Model. This route explores that approach.",
   },
   {
     id: 'cm-select-assets',
-    text: 'Click Select assets at the bottom left of the graph. A selection toolbar opens.',
+    text: 'Click Select assets at the bottom left of the graph to begin creating a scoped selection.',
   },
   {
     id: 'cm-choose-assets',
-    text: 'Choose any combination of objects and events to add to your perspective.',
+    text: "Select whichever Objects and Events are relevant to the Perspective you'd like to create.",
   },
   {
     id: 'cm-add-to-perspective',
-    text: 'When ready, click Add to perspective in the toolbar.',
+    text: "Once you've made your selection, click Add to perspective.",
   },
   {
     id: 'cm-new-perspective',
-    text: 'Add to a new perspective (or an existing one). Choose New perspective.',
+    text: 'Choose New perspective to create a Perspective from your selected assets.',
   },
   {
     id: 'cm-tab-opened',
-    text: 'A new perspective asset opens in a new tab. Continue refining it as in the from-scratch flow.',
+    text: 'A new Perspective opens in its own tab. From here, refinement works exactly the same as in the build-from-scratch flow.',
   },
   {
     id: 'cm-finish',
-    text: "You're done exploring the Context Model selection flow.",
+    text: "That's the Context Model workflow: start with an existing scope, then refine it using the graph.",
   },
 ];

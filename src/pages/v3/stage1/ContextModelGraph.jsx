@@ -44,8 +44,12 @@ function GraphViewport({ layoutKey, containerRef }) {
   const { fitView } = useReactFlow();
 
   const runFit = useCallback(() => {
+    const element = containerRef?.current;
+    if (!element) return;
+    const { width, height } = element.getBoundingClientRect();
+    if (width < 1 || height < 1) return;
     fitView({ padding: 0.1, duration: 280, maxZoom: 1.05 });
-  }, [fitView]);
+  }, [containerRef, fitView]);
 
   useEffect(() => {
     const id = window.setTimeout(runFit, 80);

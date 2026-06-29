@@ -55,13 +55,13 @@ export default function PerspectiveRefineView({
         progressive.focusExpansionFrom(id, { silent: true });
       }
     },
-    [progressive],
+    [progressive.includedObjects, progressive.focusExpansionFrom],
   );
 
   const selectCanvasWithClearFocus = useCallback(() => {
     selectCanvas();
     progressive.clearExpansionFocus();
-  }, [selectCanvas, progressive]);
+  }, [selectCanvas, progressive.clearExpansionFocus]);
 
   const graphSelection = useMemo(
     () => ({
@@ -163,12 +163,17 @@ export default function PerspectiveRefineView({
     highlightedRelationshipId,
   };
 
-  const tour = useDemoTourOptional();
+  const setRefineState = useDemoTourOptional()?.setRefineState;
 
   useEffect(() => {
-    if (!tour || !tourActive) return undefined;
+    if (!setRefineState) return undefined;
 
-    tour.setRefineState({
+    if (!tourActive) {
+      setRefineState(null);
+      return undefined;
+    }
+
+    setRefineState({
       hasStarted: progressive.hasStarted,
       includedObjects: progressive.includedObjects,
       includedEvents: progressive.includedEvents,
@@ -177,27 +182,30 @@ export default function PerspectiveRefineView({
       bottomTab,
       cycleActive: progressive.cycleActive,
       isCycleResolved: progressive.isCycleResolved,
-      prunedRelationshipIds: progressive.prunedRelationshipIds,
+      prunedRelationshipIds: progressive.routeExcluded,
       connectionPrompt: progressive.connectionPrompt,
       discoveryFilters: progressive.discoveryFilters,
     });
-
-    return () => tour.setRefineState(null);
   }, [
-    tour,
+    setRefineState,
     tourActive,
     progressive.hasStarted,
     progressive.includedObjects,
     progressive.includedEvents,
     progressive.cycleActive,
     progressive.isCycleResolved,
-    progressive.prunedRelationshipIds,
+    progressive.routeExcluded,
     progressive.connectionPrompt,
     progressive.discoveryFilters,
     selection,
     highlightedRelationshipId,
     bottomTab,
   ]);
+
+  useEffect(() => {
+    if (!setRefineState) return undefined;
+    return () => setRefineState(null);
+  }, [setRefineState]);
 
   return (
     <>
