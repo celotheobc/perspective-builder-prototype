@@ -1,4 +1,6 @@
 import PrototypeVersionPicker from '../../../components/layout/PrototypeVersionNav';
+import { useDemoTour } from '../../../components/demoTour/DemoTourContext';
+import theoBotAvatar from '../../../assets/theobot-avatar.png';
 import styles from './StudioL0Nav.module.css';
 
 const NAV_ITEMS = [
@@ -25,6 +27,8 @@ function StudioGlyph({ glyph }) {
 }
 
 export default function StudioL0Nav({ onVersionChange }) {
+  const { open, setOpen } = useDemoTour();
+
   return (
     <nav className={styles.nav} aria-label="Celonis navigation">
       <div className={styles.logo}>C</div>
@@ -44,8 +48,22 @@ export default function StudioL0Nav({ onVersionChange }) {
         <span className={styles.glyph}>⚙</span>
       </button>
       <PrototypeVersionPicker version="v3" onVersionChange={onVersionChange} />
-      <button type="button" className={styles.avatar} aria-label="Profile" title="Profile">
-        BC
+      <button
+        type="button"
+        className={`${styles.avatar} ${open ? styles.avatarActive : ''}`}
+        aria-label="TheoBot tour guide"
+        aria-expanded={open}
+        aria-controls="theobot-panel"
+        title="TheoBot"
+        onClick={() => setOpen(!open)}
+      >
+        <img
+          src={theoBotAvatar}
+          alt=""
+          className={styles.avatarImage}
+          width={32}
+          height={32}
+        />
       </button>
     </nav>
   );

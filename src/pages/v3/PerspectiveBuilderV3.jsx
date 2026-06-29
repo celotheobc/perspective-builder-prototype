@@ -11,6 +11,8 @@ import {
   assetKey,
   tabIconForType,
 } from './shell/studioAssets';
+import DemoTourPopover from '../../components/demoTour/DemoTourPopover';
+import { DemoTourProvider, useDemoTour } from '../../components/demoTour/DemoTourContext';
 import styles from './PerspectiveBuilderV3.module.css';
 
 const DEFAULT_PERSPECTIVE_NAME = 'Order to Cash Perspective';
@@ -36,12 +38,16 @@ function createBrowseTab() {
   };
 }
 
-export default function PerspectiveBuilderV3({ onVersionChange }) {
-  const [workspaceTabs, setWorkspaceTabs] = useState([createBrowseTab()]);
-  const [activeTabId, setActiveTabId] = useState(CONTEXT_BROWSE_TAB_ID);
-  const [contextByTab, setContextByTab] = useState(() => ({
-    [CONTEXT_BROWSE_TAB_ID]: createEmptyContextState(),
-  }));
+function PerspectiveBuilderV3Shell({
+  onVersionChange,
+  workspaceTabs,
+  setWorkspaceTabs,
+  activeTabId,
+  setActiveTabId,
+  contextByTab,
+  setContextByTab,
+}) {
+  const { markEvent, mergeMilestone } = useDemoTour();
 
   const patchContextTab = useCallback((tabId, patch) => {
     setContextByTab((prev) => ({
@@ -52,7 +58,7 @@ export default function PerspectiveBuilderV3({ onVersionChange }) {
         ...patch,
       },
     }));
-  }, []);
+  }, [setContextByTab]);
 
   const toggleObjectForTab = useCallback((tabId, id) => {
     setContextByTab((prev) => {
@@ -100,16 +106,19 @@ export default function PerspectiveBuilderV3({ onVersionChange }) {
       },
     ]);
     setActiveTabId(tabId);
-  }, []);
+  }, [setWorkspaceTabs, setActiveTabId]);
 
   const openCreatePerspectiveTab = useCallback(() => {
+    markEvent('scratchPerspectiveCreated');
     openRefineTab([], [], 'New Perspective');
-  }, [openRefineTab]);
+  }, [openRefineTab, markEvent]);
 
   const handleAddToNewPerspective = useCallback(
     (tabId) => {
       const state = contextByTab[tabId];
       if (!state) return;
+      mergeMilestone('contextAddClickedOnce');
+      markEvent('contextPerspectiveCreated');
       openRefineTab(
         [...state.selectedObjects],
         [...state.selectedEvents],
@@ -117,7 +126,7 @@ export default function PerspectiveBuilderV3({ onVersionChange }) {
       );
       exitSelectionForTab(tabId);
     },
-    [contextByTab, openRefineTab, exitSelectionForTab],
+    [contextByTab, openRefineTab, exitSelectionForTab, markEvent, mergeMilestone],
   );
 
   const handleOpenAsset = useCallback(
@@ -263,6 +272,7 @@ export default function PerspectiveBuilderV3({ onVersionChange }) {
           perspectiveName={tab.payload.name}
           initialObjects={tab.payload.objects}
           initialEvents={tab.payload.events}
+          tourActive={tab.id === activeTabId}
         />
       );
     }
@@ -308,6 +318,32 @@ export default function PerspectiveBuilderV3({ onVersionChange }) {
           </div>
         </div>
       </div>
+      <DemoTourPopover />
     </div>
+  );
+}
+
+export default function PerspectiveBuilderV3({ onVersionChange }) {
+  const [workspaceTabs, setWorkspaceTabs] = useState([createBrowseTab()]);
+  const [activeTabId, setActiveTabId] = useState(CONTEXT_BROWSE_TAB_ID);
+  const [contextByTab, setContextByTab] = useState(() => ({
+    [CONTEXT_BROWSE_TAB_ID]: createEmptyContextState(),
+  }));
+
+  const activeTab = workspaceTabs.find((tab) => tab.id === activeTabId);
+  const contextState = contextByTab[CONTEXT_BROWSE_TAB_ID] ?? createEmptyContextState();
+
+  return (
+    <DemoTourProvider activeTab={activeTab} contextState={contextState}>
+      <PerspectiveBuilderV3Shell
+        onVersionChange={onVersionChange}
+        workspaceTabs={workspaceTabs}
+        setWorkspaceTabs={setWorkspaceTabs}
+        activeTabId={activeTabId}
+        setActiveTabId={setActiveTabId}
+        contextByTab={contextByTab}
+        setContextByTab={setContextByTab}
+      />
+    </DemoTourProvider>
   );
 }

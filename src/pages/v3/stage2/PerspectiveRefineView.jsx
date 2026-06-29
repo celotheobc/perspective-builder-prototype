@@ -14,12 +14,14 @@ import RightInspector from '../../v2/inspector/RightInspector';
 import BottomPanelV3 from '../panels/BottomPanelV3';
 import { usePerspectiveSelection } from '../../v1_5/selection/usePerspectiveSelection';
 import { buildV2Issues } from '../../v1_5/utils/buildV2ViewData';
+import { useDemoTourOptional } from '../../../components/demoTour/DemoTourContext';
 import layoutStyles from '../../v1_5/PerspectiveBuilderV1_5.module.css';
 
 export default function PerspectiveRefineView({
   perspectiveName,
   initialObjects = [],
   initialEvents = [],
+  tourActive = false,
 }) {
   const progressive = useProgressiveBuilder('global', {
     unfocusedShowsAllGhosts: true,
@@ -160,6 +162,42 @@ export default function PerspectiveRefineView({
     alert: relationshipTable.alert,
     highlightedRelationshipId,
   };
+
+  const tour = useDemoTourOptional();
+
+  useEffect(() => {
+    if (!tour || !tourActive) return undefined;
+
+    tour.setRefineState({
+      hasStarted: progressive.hasStarted,
+      includedObjects: progressive.includedObjects,
+      includedEvents: progressive.includedEvents,
+      selection,
+      highlightedRelationshipId,
+      bottomTab,
+      cycleActive: progressive.cycleActive,
+      isCycleResolved: progressive.isCycleResolved,
+      prunedRelationshipIds: progressive.prunedRelationshipIds,
+      connectionPrompt: progressive.connectionPrompt,
+      discoveryFilters: progressive.discoveryFilters,
+    });
+
+    return () => tour.setRefineState(null);
+  }, [
+    tour,
+    tourActive,
+    progressive.hasStarted,
+    progressive.includedObjects,
+    progressive.includedEvents,
+    progressive.cycleActive,
+    progressive.isCycleResolved,
+    progressive.prunedRelationshipIds,
+    progressive.connectionPrompt,
+    progressive.discoveryFilters,
+    selection,
+    highlightedRelationshipId,
+    bottomTab,
+  ]);
 
   return (
     <>

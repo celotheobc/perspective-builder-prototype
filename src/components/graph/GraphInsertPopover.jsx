@@ -160,7 +160,7 @@ export default function GraphInsertPopover({
               className={styles.createBtn}
               onClick={() => setCreateRelationshipOpen(true)}
             >
-              Create Relationship
+              CreateRelationship
             </button>
           </div>
         </div>

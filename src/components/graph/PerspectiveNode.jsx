@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import styles from './PerspectiveNode.module.css';
 
@@ -94,34 +94,17 @@ function PerspectiveNodeComponent({ data }) {
   const showSelectionFrame =
     isSelectedContext || isInspectorSelected || basketSelected;
 
-  const [hovering, setHovering] = useState(false);
-  const [leftAfterSelect, setLeftAfterSelect] = useState(false);
+  const [returnHover, setReturnHover] = useState(false);
 
   useEffect(() => {
     if (!basketSelected) {
-      setLeftAfterSelect(false);
+      setReturnHover(false);
     }
   }, [basketSelected]);
 
-  const pickerOverlay = useMemo(() => {
-    if (!cmAssetPicker) return null;
-    if (!basketSelected && hovering) return 'plus';
-    if (basketSelected && hovering && leftAfterSelect) return 'minus';
-    if (basketSelected) return 'check';
-    return null;
-  }, [cmAssetPicker, basketSelected, hovering, leftAfterSelect]);
-
-  const handleAssetPickerEnter = () => {
-    if (!cmAssetPicker) return;
-    setHovering(true);
-  };
-
   const handleAssetPickerLeave = () => {
-    if (!cmAssetPicker) return;
-    setHovering(false);
-    if (basketSelected) {
-      setLeftAfterSelect(true);
-    }
+    if (!cmAssetPicker || !basketSelected) return;
+    setReturnHover(true);
   };
 
   return (
@@ -144,13 +127,13 @@ function PerspectiveNodeComponent({ data }) {
         explorerMuted ? styles.explorerMuted : '',
         explorerSelectable ? styles.explorerSelectable : '',
         cmAssetPicker ? styles.cmAssetPicker : '',
+        cmAssetPicker && returnHover ? styles.returnHover : '',
         !showLabel ? styles.labelHidden : '',
       ]
         .filter(Boolean)
         .join(' ')}
       role="group"
       aria-label={label}
-      onMouseEnter={cmAssetPicker ? handleAssetPickerEnter : undefined}
       onMouseLeave={cmAssetPicker ? handleAssetPickerLeave : undefined}
       onClick={
         canRefocus && !inspectorSelectionMode
@@ -209,28 +192,24 @@ function PerspectiveNodeComponent({ data }) {
           <div className={styles.puckTop}>
             {cmAssetPicker ? (
               <>
-                {!pickerOverlay && <NodeIcon kind={kind} />}
-                {pickerOverlay === 'plus' && (
-                  <span
-                    className={`${styles.cmPickerPlus} ${styles.cmPickerRaised}`}
-                    aria-hidden
-                  >
-                    +
-                  </span>
-                )}
-                {pickerOverlay === 'check' && (
-                  <span className={styles.cmPickerCheck} aria-hidden>
-                    ✓
-                  </span>
-                )}
-                {pickerOverlay === 'minus' && (
-                  <span
-                    className={`${styles.cmPickerMinus} ${styles.cmPickerRaised}`}
-                    aria-hidden
-                  >
-                    −
-                  </span>
-                )}
+                <span className={styles.cmPickerIcon} aria-hidden>
+                  <NodeIcon kind={kind} />
+                </span>
+                <span
+                  className={`${styles.cmPickerPlus} ${styles.cmPickerRaised}`}
+                  aria-hidden
+                >
+                  +
+                </span>
+                <span className={styles.cmPickerCheck} aria-hidden>
+                  ✓
+                </span>
+                <span
+                  className={`${styles.cmPickerMinus} ${styles.cmPickerRaised}`}
+                  aria-hidden
+                >
+                  −
+                </span>
               </>
             ) : (
               <NodeIcon kind={kind} />
