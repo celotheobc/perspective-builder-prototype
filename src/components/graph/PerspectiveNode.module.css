@@ -374,7 +374,7 @@
 .refocusable,
 .selectable,
 .inspectorSelected {
-  cursor: pointer;
+  cursor: grab;
 }
 
 .contextSelected .label,

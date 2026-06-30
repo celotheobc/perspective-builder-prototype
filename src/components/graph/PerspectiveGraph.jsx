@@ -10,7 +10,6 @@ import {
 } from '@xyflow/react';
 import PerspectiveNode from './PerspectiveNode';
 import RouteEdge from './RouteEdge';
-import GraphCycleOverlay from './GraphCycleOverlay';
 import GraphConnectionOverlay from './GraphConnectionOverlay';
 import GraphInsertPopover from './GraphInsertPopover';
 import ContextualDiscoveryMenu from './ContextualDiscoveryMenu';
@@ -441,6 +440,26 @@ export default function PerspectiveGraph({
     [graphSelection],
   );
 
+  const onEdgeMouseEnter = useCallback(
+    (_event, edge) => {
+      const relId = edge.data?.relId;
+      if (!relId || !graphSelection?.onHoverEdge) return;
+      const ctx = graphContextRef.current;
+      const isCycleEdge = Boolean(edge.data?.highlightCycle || edge.data?.showScissors);
+      if (ctx.cycleActive && !ctx.isResolved && !isCycleEdge) return;
+      graphSelection.onHoverEdge(relId);
+    },
+    [graphSelection],
+  );
+
+  const onEdgeMouseLeave = useCallback(
+    (_event, edge) => {
+      if (!edge.data?.relId || !graphSelection?.onHoverEdge) return;
+      graphSelection.onHoverEdge(null);
+    },
+    [graphSelection],
+  );
+
   const onPaneClick = useCallback(() => {
     graphSelection?.onSelectCanvas?.();
     contextualDiscovery?.onClose?.();
@@ -478,7 +497,7 @@ export default function PerspectiveGraph({
     <div className={`${styles.wrap} ${fillContainer ? styles.wrapFill : ''}`}>
       <div
         ref={canvasRef}
-        className={`${styles.canvas} ${fillContainer ? styles.canvasFill : ''} ${canvasUiVariant === 'v2' ? styles.canvasV2 : ''} ${showCycleOverlay ? styles.canvasRouteResolve : ''} ${graphSelection ? styles.canvasSelectable : ''}`}
+        className={`${styles.canvas} ${fillContainer ? styles.canvasFill : ''} ${canvasUiVariant === 'v2' ? styles.canvasV2 : ''} ${graphSelection ? styles.canvasSelectable : ''}`}
       >
         <div className={styles.canvasFlow}>
           <div className={styles.canvasTopLeft}>
@@ -510,7 +529,6 @@ export default function PerspectiveGraph({
             </div>
           )}
 
-          {showCycleOverlay && <GraphCycleOverlay />}
           {showConnectionOverlay && (
             <GraphConnectionOverlay
               pathCount={connectionPrompt.paths.length}
@@ -525,6 +543,8 @@ export default function PerspectiveGraph({
               onEdgesChange={onEdgesChange}
               onNodeClick={onNodeClick}
               onEdgeClick={onEdgeClick}
+              onEdgeMouseEnter={onEdgeMouseEnter}
+              onEdgeMouseLeave={onEdgeMouseLeave}
               onNodeDragStop={onNodeDragStop}
               onPaneClick={onPaneClick}
               nodeTypes={nodeTypes}
@@ -536,7 +556,7 @@ export default function PerspectiveGraph({
               minZoom={0.55}
               maxZoom={1.4}
               proOptions={{ hideAttribution: true }}
-              nodesDraggable={!graphSelection}
+              nodesDraggable
               nodesConnectable={false}
               elementsSelectable
               panOnDrag
@@ -547,7 +567,9 @@ export default function PerspectiveGraph({
               <Background
                 gap={GRAPH_GRID_GAP}
                 size={1}
+                lineWidth={1}
                 color="#e8ecf0"
+                bgColor="#ffffff"
                 variant="lines"
               />
               <Controls showInteractive={false} />

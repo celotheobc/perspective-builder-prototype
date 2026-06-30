@@ -49,6 +49,10 @@ export function usePerspectiveSelection() {
     setBottomTab('issues');
   }, []);
 
+  const hoverRelationship = useCallback((id) => {
+    setHighlightedRelationshipId(id);
+  }, []);
+
   const graphSelection = {
     selection,
     onSelectCanvas: selectCanvas,
@@ -58,6 +62,7 @@ export function usePerspectiveSelection() {
       else if (kind === 'metric') selectMetric(id, state);
     },
     onSelectEdge: ({ id, isCycleEdge }) => selectRelationship(id, isCycleEdge),
+    onHoverEdge: hoverRelationship,
   };
 
   return {

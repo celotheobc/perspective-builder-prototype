@@ -135,6 +135,14 @@
   background: var(--celonis-primary-light);
 }
 
+.rowHovered {
+  background: #f0f7ff;
+}
+
+.rowHovered td:first-child {
+  box-shadow: inset 3px 0 0 #93c5fd;
+}
+
 .rowSelected td:first-child {
   box-shadow: inset 3px 0 0 var(--celonis-primary);
 }

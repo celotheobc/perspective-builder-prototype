@@ -249,6 +249,7 @@ export default function PerspectiveRefineView({
               onSelectRelationship={handleSelectRelationship}
               onSelectIssue={handleSelectIssue}
               onHoverRelationship={setHighlightedRelationshipId}
+              highlightedRelationshipId={highlightedRelationshipId}
               perspectiveEmpty={!progressive.hasStarted}
             />
           }

@@ -13,12 +13,14 @@
   min-height: 0;
   border: 1px solid #d1d5db;
   border-radius: var(--radius);
+  background: transparent;
 }
 
 .canvas {
   height: 540px;
   position: relative;
   z-index: 1;
+  background: #fff;
 }
 
 .canvasFill {
@@ -30,6 +32,8 @@
 .canvasFlow {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .canvasRouteResolve {
@@ -46,11 +50,14 @@
 }
 
 .canvas :global(.react-flow) {
+  width: 100%;
+  height: 100%;
   background: transparent;
 }
 
 .canvas :global(.react-flow__background) {
-  opacity: 0.85;
+  z-index: 0;
+  opacity: 1;
 }
 
 .canvas :global(.react-flow__node) {
@@ -62,15 +69,13 @@
   transition: none !important;
 }
 
-/* Perspective builder: nodes are click-to-select, not drag-first */
+/* Perspective builder: click to select, drag to reposition */
 .canvasSelectable :global(.react-flow__node) {
-  cursor: pointer;
+  cursor: grab;
 }
 
-.canvasSelectable :global(.react-flow__node.selectable),
-.canvasSelectable :global(.react-flow__node:focus),
-.canvasSelectable :global(.react-flow__node.selected) {
-  cursor: pointer;
+.canvasSelectable :global(.react-flow__node.dragging) {
+  cursor: grabbing;
 }
 
 .canvasSelectable :global(.react-flow__pane) {
@@ -78,10 +83,6 @@
 }
 
 .canvasSelectable :global(.react-flow__pane:active) {
-  cursor: grabbing;
-}
-
-.canvasSelectable :global(.react-flow__node.dragging) {
   cursor: grabbing;
 }
 

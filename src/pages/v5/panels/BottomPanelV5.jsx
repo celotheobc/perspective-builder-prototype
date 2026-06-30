@@ -3,7 +3,7 @@ import PanelEmptyHint from '../components/PanelEmptyHint';
 import panelTabStyles from '../components/PanelTabs.module.css';
 import styles from '../../v1_5/panels/BottomPanel.module.css';
 
-function DataTable({ columns, rows, selectedId, onSelectRow, onHoverRow, empty }) {
+function DataTable({ columns, rows, selectedId, highlightedId, onSelectRow, onHoverRow, empty }) {
   if (!rows.length) {
     return <p className={styles.empty}>{empty}</p>;
   }
@@ -22,7 +22,13 @@ function DataTable({ columns, rows, selectedId, onSelectRow, onHoverRow, empty }
           {rows.map((row) => (
             <tr
               key={row.id}
-              className={selectedId === row.id ? styles.rowSelected : undefined}
+              className={
+                selectedId === row.id
+                  ? styles.rowSelected
+                  : highlightedId === row.id
+                    ? styles.rowHovered
+                    : undefined
+              }
               tabIndex={0}
               onClick={() => onSelectRow?.(row)}
               onMouseEnter={() => onHoverRow?.(row.id)}
@@ -65,6 +71,7 @@ export default function BottomPanelV5({
   onSelectRelationship,
   onSelectIssue,
   onHoverRelationship,
+  highlightedRelationshipId = null,
   perspectiveEmpty = false,
 }) {
   const selectedRowId =
@@ -124,6 +131,7 @@ export default function BottomPanelV5({
                   ]}
                   rows={relationshipRows}
                   selectedId={selectedRowId}
+                  highlightedId={highlightedRelationshipId}
                   empty="No relationships included yet."
                   onSelectRow={(row) => onSelectRelationship(row.id, row.isConflicting)}
                   onHoverRow={onHoverRelationship}

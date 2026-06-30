@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CYCLE_RESOLUTION_COPY } from '../../../utils/cycleResolutionCopy';
 import { getCycleConsequencePreview } from '../data/cycleConsequencePreviews';
 import styles from './CycleResolutionInspector.module.css';
@@ -39,6 +39,16 @@ export default function CycleResolutionInspector({
   onRemoveRelationship,
 }) {
   const loopRows = rows.filter((r) => r.isConflicting);
+  const cardRefs = useRef(new Map());
+  const hoveredFromPanelRef = useRef(false);
+
+  useEffect(() => {
+    if (!highlightedRelationshipId || hoveredFromPanelRef.current) return;
+    cardRefs.current.get(highlightedRelationshipId)?.scrollIntoView({
+      block: 'nearest',
+      behavior: 'smooth',
+    });
+  }, [highlightedRelationshipId]);
 
   return (
     <>
@@ -62,11 +72,23 @@ export default function CycleResolutionInspector({
           const consequence = getCycleConsequencePreview(row.id);
 
           return (
-            <li key={row.id}>
+            <li
+              key={row.id}
+              ref={(el) => {
+                if (el) cardRefs.current.set(row.id, el);
+                else cardRefs.current.delete(row.id);
+              }}
+            >
               <div
                 className={`${styles.loopCard} ${active ? styles.loopCardActive : ''}`}
-                onMouseEnter={() => onHighlightRelationship(row.id)}
-                onMouseLeave={() => onHighlightRelationship(null)}
+                onMouseEnter={() => {
+                  hoveredFromPanelRef.current = true;
+                  onHighlightRelationship(row.id);
+                }}
+                onMouseLeave={() => {
+                  hoveredFromPanelRef.current = false;
+                  onHighlightRelationship(null);
+                }}
               >
                 <button
                   type="button"
