@@ -52,17 +52,9 @@ export default function ConfigurationModule({
         </div>
       )}
 
-      {isProgressive && !progressive.hasStarted && (
-        <EmptyStateComponent
-          onAddObject={progressive.addObject}
-          centered={layout === 'canvas'}
-          {...emptyStateProps}
-        />
-      )}
-
-      {(isProgressive && progressive.hasStarted) || isRoute ? (
+      {isProgressive && (
         <>
-          {!hideSummary && (
+          {!hideSummary && progressive.hasStarted && (
             <SummaryStrip
               objectCount={objectCount}
               eventCount={eventCount}
@@ -71,49 +63,57 @@ export default function ConfigurationModule({
             />
           )}
 
-          <PerspectiveGraph
-            mode={isRoute ? 'route-ambiguity' : 'progressive'}
-            graphContext={{
-              ...graphContext,
-              unifiedSuggestions: canvasUiVariant === 'v2',
-            }}
-            canvasUiVariant={canvasUiVariant}
-            hideMetrics={hideMetrics}
-            showInsertPopover={isProgressive && progressive.hasStarted}
-            fillContainer={fillGraph}
-            graphSelection={graphSelection}
-            contextualDiscovery={
-              isContextual
-                ? {
-                    selection: progressive.contextualSelection,
-                    counts: progressive.contextualCounts,
-                    onReveal: progressive.revealContextualCategory,
-                    onClose: progressive.closeContextualMenu,
-                  }
-                : null
-            }
-            canvasControls={{
-              variant: canvasUiVariant,
-              discovery: isGlobal
-                ? {
-                    filters: progressive.discoveryFilters,
-                    onToggle: progressive.toggleDiscoveryFilter,
-                    disabled: progressive.cycleActive,
-                    showOnlyIncluded: progressive.showOnlyIncluded,
-                    onSetShowOnlyIncluded: progressive.setShowOnlyIncluded,
-                  }
-                : null,
-              showOnlyIncluded: isProgressive
-                ? progressive.showOnlyIncluded
-                : false,
-              onToggleShowOnly: isProgressive
-                ? progressive.setShowOnlyIncluded
-                : undefined,
-              showViewToggle: isProgressive && canvasUiVariant !== 'v2',
-            }}
-          />
+          <div className={layout === 'canvas' ? styles.graphSurface : styles.graphStack}>
+            <PerspectiveGraph
+              mode="progressive"
+              graphContext={{
+                ...graphContext,
+                unifiedSuggestions: canvasUiVariant === 'v2',
+              }}
+              canvasUiVariant={canvasUiVariant}
+              hideMetrics={hideMetrics}
+              showInsertPopover={progressive.hasStarted}
+              fillContainer={fillGraph}
+              graphSelection={graphSelection}
+              contextualDiscovery={
+                isContextual
+                  ? {
+                      selection: progressive.contextualSelection,
+                      counts: progressive.contextualCounts,
+                      onReveal: progressive.revealContextualCategory,
+                      onClose: progressive.closeContextualMenu,
+                    }
+                  : null
+              }
+              canvasControls={{
+                variant: canvasUiVariant,
+                discovery: isGlobal
+                  ? {
+                      filters: progressive.discoveryFilters,
+                      onToggle: progressive.toggleDiscoveryFilter,
+                      disabled: progressive.cycleActive,
+                      showOnlyIncluded: progressive.showOnlyIncluded,
+                      onSetShowOnlyIncluded: progressive.setShowOnlyIncluded,
+                    }
+                  : null,
+                showOnlyIncluded: progressive.showOnlyIncluded,
+                onToggleShowOnly: progressive.setShowOnlyIncluded,
+                showViewToggle: progressive.hasStarted && canvasUiVariant !== 'v2',
+              }}
+            />
 
-          {isProgressive && layout !== 'canvas' && (
+            {!progressive.hasStarted && (
+              <div className={styles.emptyOverlay}>
+                <EmptyStateComponent
+                  onAddObject={progressive.addObject}
+                  centered={layout === 'canvas'}
+                  {...emptyStateProps}
+                />
+              </div>
+            )}
+          </div>
+
+          {progressive.hasStarted && layout !== 'canvas' && (
             <DisconnectedConnectionPanel
               prompt={progressive.connectionPrompt}
               includedObjects={progressive.includedObjects}
@@ -125,7 +125,29 @@ export default function ConfigurationModule({
             />
           )}
         </>
-      ) : null}
+      )}
+
+      {isRoute && (
+        <>
+          {!hideSummary && (
+            <SummaryStrip
+              objectCount={objectCount}
+              eventCount={eventCount}
+              relationshipCount={relationshipCount}
+              validationStatus={validationStatus}
+            />
+          )}
+
+          <PerspectiveGraph
+            mode="route-ambiguity"
+            graphContext={graphContext}
+            canvasUiVariant={canvasUiVariant}
+            hideMetrics={hideMetrics}
+            fillContainer={fillGraph}
+            graphSelection={graphSelection}
+          />
+        </>
+      )}
     </section>
   );
 }

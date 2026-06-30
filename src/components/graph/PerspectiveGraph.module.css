@@ -67,6 +67,20 @@
   cursor: pointer;
 }
 
+.canvasSelectable :global(.react-flow__node.selectable),
+.canvasSelectable :global(.react-flow__node:focus),
+.canvasSelectable :global(.react-flow__node.selected) {
+  cursor: pointer;
+}
+
+.canvasSelectable :global(.react-flow__pane) {
+  cursor: grab;
+}
+
+.canvasSelectable :global(.react-flow__pane:active) {
+  cursor: grabbing;
+}
+
 .canvasSelectable :global(.react-flow__node.dragging) {
   cursor: grabbing;
 }

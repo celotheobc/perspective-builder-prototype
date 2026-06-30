@@ -10,7 +10,6 @@ import {
 } from '@xyflow/react';
 import PerspectiveNode from './PerspectiveNode';
 import RouteEdge from './RouteEdge';
-import MakeGridBackdrop from './MakeGridBackdrop';
 import GraphCycleOverlay from './GraphCycleOverlay';
 import GraphConnectionOverlay from './GraphConnectionOverlay';
 import GraphInsertPopover from './GraphInsertPopover';
@@ -365,8 +364,6 @@ export default function PerspectiveGraph({
     flowRef.current = instance;
   }, []);
 
-  const flowReady = nodes.length > 0;
-
   const refreshEdgeHandles = useCallback(
     (nodeList) => {
       const list = nodeList ?? nodesRef.current;
@@ -479,8 +476,6 @@ export default function PerspectiveGraph({
 
   return (
     <div className={`${styles.wrap} ${fillContainer ? styles.wrapFill : ''}`}>
-      <MakeGridBackdrop />
-
       <div
         ref={canvasRef}
         className={`${styles.canvas} ${fillContainer ? styles.canvasFill : ''} ${canvasUiVariant === 'v2' ? styles.canvasV2 : ''} ${showCycleOverlay ? styles.canvasRouteResolve : ''} ${graphSelection ? styles.canvasSelectable : ''}`}
@@ -522,52 +517,50 @@ export default function PerspectiveGraph({
               objectName={connectionObjectName}
             />
           )}
-          {flowReady && (
-            <ReactFlowProvider>
-              <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onNodeClick={onNodeClick}
-                onEdgeClick={onEdgeClick}
-                onNodeDragStop={onNodeDragStop}
-                onPaneClick={onPaneClick}
-                nodeTypes={nodeTypes}
-                edgeTypes={edgeTypes}
-                defaultEdgeOptions={defaultEdgeOptions}
-                nodeOrigin={[0.5, 0.34]}
-                defaultViewport={defaultViewport ?? undefined}
-                onInit={onInit}
-                minZoom={0.55}
-                maxZoom={1.4}
-                proOptions={{ hideAttribution: true }}
-                nodesDraggable
-                nodesConnectable={false}
-                elementsSelectable
-                panOnDrag
-                selectionOnDrag={false}
-                snapToGrid
-                snapGrid={GRAPH_SNAP_GRID}
-              >
-                <Background
-                  gap={GRAPH_GRID_GAP}
-                  size={1}
-                  color="#e8ecf0"
-                  variant="lines"
-                />
-                <Controls showInteractive={false} />
-              </ReactFlow>
-              {contextualDiscovery && (
-                <ContextualDiscoveryMenu
-                  selection={contextualDiscovery.selection}
-                  counts={contextualDiscovery.counts}
-                  onReveal={contextualDiscovery.onReveal}
-                  onClose={contextualDiscovery.onClose}
-                />
-              )}
-            </ReactFlowProvider>
-          )}
+          <ReactFlowProvider>
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onNodeClick={onNodeClick}
+              onEdgeClick={onEdgeClick}
+              onNodeDragStop={onNodeDragStop}
+              onPaneClick={onPaneClick}
+              nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
+              defaultEdgeOptions={defaultEdgeOptions}
+              nodeOrigin={[0.5, 0.34]}
+              defaultViewport={defaultViewport ?? undefined}
+              onInit={onInit}
+              minZoom={0.55}
+              maxZoom={1.4}
+              proOptions={{ hideAttribution: true }}
+              nodesDraggable={!graphSelection}
+              nodesConnectable={false}
+              elementsSelectable
+              panOnDrag
+              selectionOnDrag={false}
+              snapToGrid
+              snapGrid={GRAPH_SNAP_GRID}
+            >
+              <Background
+                gap={GRAPH_GRID_GAP}
+                size={1}
+                color="#e8ecf0"
+                variant="lines"
+              />
+              <Controls showInteractive={false} />
+            </ReactFlow>
+            {contextualDiscovery && (
+              <ContextualDiscoveryMenu
+                selection={contextualDiscovery.selection}
+                counts={contextualDiscovery.counts}
+                onReveal={contextualDiscovery.onReveal}
+                onClose={contextualDiscovery.onClose}
+              />
+            )}
+          </ReactFlowProvider>
         </div>
 
         {canvasUiVariant !== 'v2' && (

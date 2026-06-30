@@ -6,7 +6,6 @@ import {
   ReactFlowProvider,
   useReactFlow,
 } from '@xyflow/react';
-import MakeGridBackdrop from '../../../components/graph/MakeGridBackdrop';
 import { GRAPH_GRID_GAP } from '../../../utils/graphGrid';
 import {
   getContextEventName,
@@ -174,7 +173,6 @@ function ProcessGraphInner({
           proOptions={{ hideAttribution: true }}
         >
           <GraphViewport layoutKey={layoutKey} containerRef={wrapRef} />
-          <MakeGridBackdrop />
           <Background gap={GRAPH_GRID_GAP} size={1} color="#e8ecf0" variant="lines" />
           <Controls showInteractive={false} position="bottom-right" />
         </ReactFlow>

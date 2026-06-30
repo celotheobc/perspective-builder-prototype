@@ -71,7 +71,7 @@
   width: 56px;
   height: 56px;
   margin: 0 auto 10px;
-  border-radius: 50%;
+  border-radius: 14px;
   color: #fff;
   display: flex;
   align-items: center;
@@ -80,6 +80,7 @@
 }
 
 .heroObject {
+  border-radius: 14px;
   background: linear-gradient(165deg, #5eb0ff, #2280e0);
   border: 1.5px solid #1b6fd1;
   box-shadow: 0 6px 16px rgba(27, 111, 209, 0.28);
