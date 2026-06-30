@@ -4,5 +4,4 @@ export const CYCLE_RESOLUTION_COPY = {
   message: 'Remove one highlighted connection on the graph to resolve the cycle.',
   canvasMessage:
     'Remove one highlighted connection (✂) on the graph to resolve the cycle.',
-  panelHint: 'Choose a relationship below, or use ✂ on the graph.',
 };

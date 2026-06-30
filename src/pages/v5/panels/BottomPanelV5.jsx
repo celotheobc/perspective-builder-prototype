@@ -1,6 +1,6 @@
-import { agentContextMarkdown } from '../../../data/mockData';
 import ResizeHandle from '../../v1_5/layout/ResizeHandle';
 import PanelEmptyHint from '../components/PanelEmptyHint';
+import panelTabStyles from '../components/PanelTabs.module.css';
 import styles from '../../v1_5/panels/BottomPanel.module.css';
 
 function DataTable({ columns, rows, selectedId, onSelectRow, onHoverRow, empty }) {
@@ -44,7 +44,6 @@ function DataTable({ columns, rows, selectedId, onSelectRow, onHoverRow, empty }
 const TABS = [
   { id: 'relationships', label: 'Relationships', countKey: 'relationships' },
   { id: 'issues', label: 'Issues / Problems', countKey: 'issues' },
-  { id: 'agent', label: 'AI Context' },
 ];
 
 function tabLabel(tab, tabCounts) {
@@ -88,14 +87,14 @@ export default function BottomPanelV5({
       )}
       <div className={styles.panel}>
         <header className={styles.header}>
-          <div className={styles.tabs} role="tablist">
+          <div className={panelTabStyles.bar} role="tablist">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 role="tab"
                 aria-selected={activeTab === tab.id}
-                className={activeTab === tab.id ? styles.tabActive : styles.tab}
+                className={activeTab === tab.id ? panelTabStyles.tabActive : panelTabStyles.tab}
                 onClick={() => onTabChange(tab.id)}
               >
                 {tabLabel(tab, tabCounts)}
@@ -148,15 +147,6 @@ export default function BottomPanelV5({
                   </button>
                 ))}
               </div>
-            )}
-
-            {activeTab === 'agent' && (
-              <textarea
-                className={styles.agentEditor}
-                readOnly
-                value={agentContextMarkdown}
-                aria-label="AI Context"
-              />
             )}
           </div>
         )}

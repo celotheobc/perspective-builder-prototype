@@ -58,10 +58,7 @@ function ProcessTrackNodeComponent({ data }) {
         </span>
       ))}
 
-      <div
-        className={styles.marker}
-        style={{ borderColor: laneColor, background: `${laneColor}14` }}
-      >
+      <div className={styles.marker} style={{ '--lane-color': laneColor }}>
         <div className={`${styles.markerInner} ${nodeStyles.puckTop}`}>
           {cmAssetPicker ? (
             <>

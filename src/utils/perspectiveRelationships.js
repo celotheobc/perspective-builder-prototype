@@ -1,11 +1,24 @@
 import { objects, relationshipTableMeta } from '../data/mockData';
 import { CYCLE_RESOLUTION_COPY } from './cycleResolutionCopy';
 
+function humanizeMetaName(metaName) {
+  if (!metaName) return null;
+  return metaName
+    .replace(/([A-Z])/g, ' $1')
+    .trim()
+    .replace(/\s+To\s+/g, ' to ');
+}
+
 function relationshipDisplayName(sourceName, targetName, metaName) {
-  if (metaName) return metaName;
+  const humanized = humanizeMetaName(metaName);
+  if (humanized) return humanized;
   const s = sourceName.replace(/\s+/g, '');
   const t = targetName.replace(/\s+/g, '');
-  return `${s}To${t}`;
+  return `${s} to ${t}`;
+}
+
+export function formatObjectEventLinkName(objectName, eventName) {
+  return `${objectName} to ${eventName}`;
 }
 
 export function buildPerspectiveRelationshipRows(activeRelationships, includedObjects) {

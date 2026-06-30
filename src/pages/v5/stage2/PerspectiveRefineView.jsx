@@ -9,7 +9,7 @@ import { useProgressiveBuilder } from '../../../hooks/useProgressiveBuilder';
 import { useGraphBuilderContext } from '../../../hooks/useGraphBuilderContext';
 import { EXPERIENCES } from '../../../data/mockData';
 import AssetEditorLayout from '../../v2/layout/AssetEditorLayout';
-import { usePanelDimensions } from '../../v1_5/layout/usePanelDimensions';
+import { usePanelDimensionsV5 } from '../layout/usePanelDimensionsV5';
 import RightInspector from '../inspector/RightInspector';
 import BottomPanelV5 from '../panels/BottomPanelV5';
 import { usePerspectiveSelection } from '../selection/usePerspectiveSelection';
@@ -35,8 +35,9 @@ export default function PerspectiveRefineView({
   const [sourceProcessId, setSourceProcessId] = useState(initialSourceProcessId);
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [bottomCollapsed, setBottomCollapsed] = useState(false);
+  const [rightPanelTab, setRightPanelTab] = useState('metadata');
   const { rightWidth, bottomHeight, adjustRightWidth, adjustBottomHeight } =
-    usePanelDimensions();
+    usePanelDimensionsV5();
 
   const {
     selection,
@@ -64,6 +65,7 @@ export default function PerspectiveRefineView({
   const selectCanvasWithClearFocus = useCallback(() => {
     selectCanvas();
     progressive.clearExpansionFocus();
+    setRightPanelTab('metadata');
   }, [selectCanvas, progressive.clearExpansionFocus]);
 
   const graphSelection = useMemo(
@@ -72,7 +74,12 @@ export default function PerspectiveRefineView({
       onSelectCanvas: selectCanvasWithClearFocus,
       onSelectNode: ({ kind, id, state }) => {
         baseGraphSelection.onSelectNode({ kind, id, state });
+        setRightPanelTab('settings');
         if (kind === 'object') focusIncludedObject(id);
+      },
+      onSelectEdge: ({ id, isCycleEdge }) => {
+        baseGraphSelection.onSelectEdge({ id, isCycleEdge });
+        setRightPanelTab('settings');
       },
     }),
     [baseGraphSelection, focusIncludedObject, selectCanvasWithClearFocus],
@@ -82,6 +89,7 @@ export default function PerspectiveRefineView({
     (id) => {
       selectObject(id);
       focusIncludedObject(id);
+      setRightPanelTab('settings');
       setRightCollapsed(false);
     },
     [selectObject, focusIncludedObject],
@@ -90,6 +98,7 @@ export default function PerspectiveRefineView({
   const handleSelectEvent = useCallback(
     (id) => {
       selectEvent(id);
+      setRightPanelTab('settings');
       setRightCollapsed(false);
     },
     [selectEvent],
@@ -98,6 +107,7 @@ export default function PerspectiveRefineView({
   const handleSelectRelationship = useCallback(
     (id, isCycleEdge = false) => {
       selectRelationship(id, isCycleEdge);
+      setRightPanelTab('settings');
       setRightCollapsed(false);
       setBottomCollapsed(false);
     },
@@ -208,8 +218,6 @@ export default function PerspectiveRefineView({
               perspectiveName={perspectiveName}
               objectRows={objectRows}
               eventRows={eventRows}
-              relationshipCount={relationshipTable.rows.length}
-              issueCount={issues.length}
               sourceProcessId={sourceProcessId}
               collapsed={rightCollapsed}
               onToggle={() => setRightCollapsed((v) => !v)}
@@ -220,6 +228,8 @@ export default function PerspectiveRefineView({
               onSelectRelationship={handleSelectRelationship}
               onSelectObject={handleSelectObject}
               onSelectEvent={handleSelectEvent}
+              activeTab={rightPanelTab}
+              onActiveTabChange={setRightPanelTab}
             />
           }
           bottomPanel={

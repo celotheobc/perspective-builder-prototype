@@ -1,7 +1,15 @@
 import { eventLinks, relationships } from '../../../data/mockData';
 
+const OBJECT_NODE_WIDTH = 100;
+const OBJECT_MARKER_SIZE = 52;
+const OBJECT_MARKER_RADIUS = OBJECT_MARKER_SIZE / 2;
+const EVENT_NODE_WIDTH = 72;
+const EVENT_STATION_SIZE = 34;
+const EVENT_STATION_RADIUS = EVENT_STATION_SIZE / 2;
+
 const LANE_START_X = 56;
-const LANE_TRACK_START_X = 118;
+const OBJECT_NODE_X = LANE_START_X - OBJECT_NODE_WIDTH / 2;
+const LANE_TRACK_START_X = LANE_START_X + OBJECT_MARKER_RADIUS;
 const LANE_EVENT_START_X = 220;
 const EVENT_STEP_X = 148;
 const LANE_BASE_Y = 88;
@@ -89,8 +97,8 @@ export function computeProcessLaneLayout(objectIds, eventIds) {
     maxEndX = Math.max(maxEndX, endX);
 
     positions[objectId] = {
-      x: LANE_START_X - 50,
-      y: y - 34,
+      x: OBJECT_NODE_X,
+      y: y - OBJECT_MARKER_RADIUS,
       role: 'object',
       laneY: y,
     };
@@ -98,8 +106,8 @@ export function computeProcessLaneLayout(objectIds, eventIds) {
     laneEvents.forEach((eventId, index) => {
       const eventX = LANE_EVENT_START_X + index * EVENT_STEP_X;
       positions[eventId] = {
-        x: eventX - 36,
-        y: y - 28,
+        x: eventX - EVENT_NODE_WIDTH / 2,
+        y: y - EVENT_STATION_RADIUS,
         role: 'event',
         laneObjectId: objectId,
         laneY: y,

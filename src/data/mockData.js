@@ -146,8 +146,8 @@ export const assetMetadata = {
   status: 'Draft',
   type: 'Perspective',
   referenceKey: 'order_to_cash_perspective',
-  createdBy: 'Hans Peter Mayer',
-  lastUpdatedBy: 'Kai Uwe Müller',
+  createdBy: 'Theo Bonham Carter',
+  lastUpdatedBy: 'Theo Bonham Carter',
   cacheStatus: 'Available',
 };
 

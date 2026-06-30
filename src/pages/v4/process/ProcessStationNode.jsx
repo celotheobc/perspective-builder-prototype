@@ -61,7 +61,7 @@ function ProcessStationNodeComponent({ data }) {
         </span>
       ))}
 
-      <div className={styles.station} style={{ borderColor: laneColor }}>
+      <div className={styles.station} style={{ '--lane-color': laneColor }}>
         <div className={`${styles.stationInner} ${nodeStyles.puckTop}`}>
           {cmAssetPicker ? (
             <>

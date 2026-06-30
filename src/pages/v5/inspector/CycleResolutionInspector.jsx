@@ -1,6 +1,34 @@
+import { useState } from 'react';
 import { CYCLE_RESOLUTION_COPY } from '../../../utils/cycleResolutionCopy';
 import { getCycleConsequencePreview } from '../data/cycleConsequencePreviews';
 import styles from './CycleResolutionInspector.module.css';
+
+const MAX_VISIBLE_BULLETS = 2;
+
+function ConsequenceBullets({ bullets }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasMore = bullets.length > MAX_VISIBLE_BULLETS;
+  const visible = expanded || !hasMore ? bullets : bullets.slice(0, MAX_VISIBLE_BULLETS);
+
+  return (
+    <>
+      <ul className={styles.consequenceList}>
+        {visible.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+      {hasMore && (
+        <button
+          type="button"
+          className={styles.consequenceShowMore}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? 'Show less' : `Show more (${bullets.length - MAX_VISIBLE_BULLETS})`}
+        </button>
+      )}
+    </>
+  );
+}
 
 export default function CycleResolutionInspector({
   rows,
@@ -48,19 +76,9 @@ export default function CycleResolutionInspector({
                   onBlur={() => onHighlightRelationship(null)}
                 >
                   <span className={styles.loopName}>{row.name}</span>
-                  <span className={styles.loopRoute}>
-                    {row.source} → {row.target}
-                  </span>
-                  <span className={styles.loopMeta}>
-                    <span className={styles.loopBadge}>In loop</span>
-                  </span>
                 </button>
 
-                <ul className={styles.consequenceList}>
-                  {consequence.bullets.map((line) => (
-                    <li key={line}>{line}</li>
-                  ))}
-                </ul>
+                <ConsequenceBullets bullets={consequence.bullets} />
 
                 {onRemoveRelationship && (
                   <button
