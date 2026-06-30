@@ -62,13 +62,19 @@
   flex: 1;
 }
 
+.avatarWrap {
+  position: relative;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
 .avatar {
   width: 32px;
   height: 32px;
   border: none;
   border-radius: 50%;
   padding: 0;
-  margin-top: 6px;
+  margin-top: 0;
   overflow: hidden;
   background: #f1f5f9;
   box-shadow: inset 0 0 0 1px var(--celonis-border);
@@ -76,6 +82,37 @@
   transition:
     box-shadow var(--transition),
     transform var(--transition);
+}
+
+.avatarHint {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #f8f9fa;
+  pointer-events: none;
+  animation: avatarHintPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes avatarHintPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatarHint {
+    animation: none;
+  }
 }
 
 .avatar:hover {

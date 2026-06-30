@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import PrototypeVersionPicker from '../../../components/layout/PrototypeVersionNav';
 import { useDemoTour } from '../../../components/demoTour/DemoTourContext';
 import theoBotAvatar from '../../../assets/theobot-avatar.png';
@@ -28,6 +29,19 @@ function StudioGlyph({ glyph }) {
 
 export default function StudioL0Nav({ onVersionChange }) {
   const { open, setOpen } = useDemoTour();
+  const [hintReady, setHintReady] = useState(false);
+  const [hintDismissed, setHintDismissed] = useState(false);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setHintReady(true), 1000);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
+    if (open) setHintDismissed(true);
+  }, [open]);
+
+  const showHint = hintReady && !hintDismissed && !open;
 
   return (
     <nav className={styles.nav} aria-label="Celonis navigation">
@@ -48,23 +62,26 @@ export default function StudioL0Nav({ onVersionChange }) {
         <span className={styles.glyph}>⚙</span>
       </button>
       <PrototypeVersionPicker version="v3" onVersionChange={onVersionChange} />
-      <button
-        type="button"
-        className={`${styles.avatar} ${open ? styles.avatarActive : ''}`}
-        aria-label="TheoBot tour guide"
-        aria-expanded={open}
-        aria-controls="theobot-panel"
-        title="TheoBot"
-        onClick={() => setOpen(!open)}
-      >
-        <img
-          src={theoBotAvatar}
-          alt=""
-          className={styles.avatarImage}
-          width={32}
-          height={32}
-        />
-      </button>
+      <div className={styles.avatarWrap}>
+        <button
+          type="button"
+          className={`${styles.avatar} ${open ? styles.avatarActive : ''}`}
+          aria-label="TheoBot tour guide"
+          aria-expanded={open}
+          aria-controls="theobot-panel"
+          title="TheoBot"
+          onClick={() => setOpen(!open)}
+        >
+          <img
+            src={theoBotAvatar}
+            alt=""
+            className={styles.avatarImage}
+            width={32}
+            height={32}
+          />
+        </button>
+        {showHint && <span className={styles.avatarHint} aria-hidden />}
+      </div>
     </nav>
   );
 }
