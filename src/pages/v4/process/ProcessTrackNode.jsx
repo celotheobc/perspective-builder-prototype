@@ -1,5 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
+import { ObjectTypeIcon } from '../../../components/icons/ContextModelIcons';
 import nodeStyles from '../../../components/graph/PerspectiveNode.module.css';
 import styles from './ProcessTrackNode.module.css';
 
@@ -9,15 +10,6 @@ const SIDES = [
   { position: Position.Bottom, id: 'bottom' },
   { position: Position.Left, id: 'left' },
 ];
-
-function ObjectIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden>
-      <rect x="4" y="6" width="16" height="14" rx="2" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path d="M8 6V4h8v2" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
-}
 
 function ProcessTrackNodeComponent({ data }) {
   const {
@@ -63,7 +55,7 @@ function ProcessTrackNodeComponent({ data }) {
           {cmAssetPicker ? (
             <>
               <span className={nodeStyles.cmPickerIcon} aria-hidden>
-                <ObjectIcon />
+                <ObjectTypeIcon size={16} monochrome className={styles.iconSvg} />
               </span>
               <span className={`${nodeStyles.cmPickerPlus} ${nodeStyles.cmPickerRaised}`} aria-hidden>
                 +
@@ -76,7 +68,7 @@ function ProcessTrackNodeComponent({ data }) {
               </span>
             </>
           ) : (
-            <ObjectIcon />
+            <ObjectTypeIcon size={16} monochrome className={styles.iconSvg} />
           )}
         </div>
       </div>

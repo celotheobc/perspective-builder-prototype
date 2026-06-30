@@ -92,6 +92,14 @@
   box-shadow: 0 6px 16px rgba(13, 138, 91, 0.28);
 }
 
+.heroRelationship {
+  border-radius: 14px;
+  background: linear-gradient(165deg, #34d399, #059669);
+  border: 1.5px solid #047857;
+  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.28);
+  color: #fff;
+}
+
 .heroProcess {
   border-radius: 14px;
   background: linear-gradient(165deg, #c5e063, #65a30d);

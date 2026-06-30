@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { objects } from '../../../data/mockData';
+import { ObjectTypeIcon, ProcessFlowIcon } from '../../../components/icons/ContextModelIcons';
 import styles from './PerspectiveStartSearch.module.css';
 
 const PROCESSES = [
@@ -12,25 +13,6 @@ const DEFAULT_OBJECT_IDS = ['customer', 'sales-order', 'delivery', 'invoice'];
 
 function matchesQuery(name, query) {
   return name.toLowerCase().includes(query);
-}
-
-function ObjectIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="5" y="5" width="14" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
-}
-
-function ProcessIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="6" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
-      <circle cx="18" cy="6" r="2.5" stroke="currentColor" strokeWidth="2" />
-      <circle cx="18" cy="18" r="2.5" stroke="currentColor" strokeWidth="2" />
-      <path d="M8.2 11.2l6.6-3.8M8.2 12.8l6.6 3.8" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
 }
 
 export default function PerspectiveStartSearch({ onSelectObject, onSelectProcess }) {
@@ -120,7 +102,7 @@ export default function PerspectiveStartSearch({ onSelectObject, onSelectProcess
                       }}
                     >
                       <span className={`${styles.resultIcon} ${styles.resultIconObject}`}>
-                        <ObjectIcon />
+                        <ObjectTypeIcon size={14} />
                       </span>
                       <span className={styles.resultName}>{obj.name}</span>
                     </button>
@@ -146,7 +128,7 @@ export default function PerspectiveStartSearch({ onSelectObject, onSelectProcess
                       }}
                     >
                       <span className={`${styles.resultIcon} ${styles.resultIconProcess}`}>
-                        <ProcessIcon />
+                        <ProcessFlowIcon size={14} />
                       </span>
                       <span className={styles.resultName}>{process.name}</span>
                     </button>

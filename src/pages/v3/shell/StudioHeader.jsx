@@ -1,35 +1,47 @@
-import { STUDIO_CONTEXT_MODEL } from './studioAssets';
 import styles from './StudioHeader.module.css';
+
+const SKELETON_CRUMBS = [44, 56, 40];
+
+function PlayIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+      <path
+        d="M4 2.75 9.25 6 4 9.25V2.75Z"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function StudioHeader() {
   return (
     <header className={styles.header}>
-      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-        <button type="button" className={styles.breadcrumbLink}>
-          Context Models
-        </button>
-        <span className={styles.breadcrumbSep} aria-hidden>
-          ›
-        </span>
-        <span className={styles.breadcrumbCurrent}>{STUDIO_CONTEXT_MODEL}</span>
+      <nav className={styles.skeletonTrail} aria-label="Location">
+        {SKELETON_CRUMBS.map((width, index) => (
+          <span key={index} className={styles.skeletonGroup}>
+            {index > 0 ? (
+              <span className={styles.skeletonSep} aria-hidden>
+                ›
+              </span>
+            ) : null}
+            <span
+              className={styles.skeletonBar}
+              style={{ width: `${width}px` }}
+              aria-hidden
+            />
+          </span>
+        ))}
       </nav>
 
       <div className={styles.actions}>
-        <button type="button" className={styles.versionBtn} aria-haspopup="listbox">
-          <span className={styles.versionHash}>35b93a2</span>
-          <span className={styles.versionCaret} aria-hidden>
-            ▾
-          </span>
-        </button>
-        <button type="button" className={styles.createVersion}>
-          Create version
-          <span className={styles.badge}>9</span>
+        <button type="button" className={styles.preview}>
+          <PlayIcon />
+          Preview
         </button>
         <button type="button" className={styles.deploy}>
           Deploy
-        </button>
-        <button type="button" className={styles.avatar} aria-label="Profile">
-          <span className={styles.avatarDot} />
         </button>
       </div>
     </header>

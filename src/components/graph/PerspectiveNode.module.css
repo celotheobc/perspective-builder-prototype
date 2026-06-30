@@ -105,11 +105,15 @@
   transition: background 0.32s ease, opacity 0.32s ease;
 }
 
-.iconSvg {
+.iconSvg,
+.nodeTypeIcon {
   width: 20px;
   height: 20px;
   color: #fff;
   pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .plusBtn {

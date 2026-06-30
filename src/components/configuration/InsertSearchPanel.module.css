@@ -98,13 +98,13 @@
 }
 
 .kindObject {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #eff6ff;
+  color: #1b6fd1;
 }
 
 .kindEvent {
-  background: #d1fae5;
-  color: #047857;
+  background: #ecfdf5;
+  color: #2db87a;
 }
 
 .kindMetric {
@@ -113,8 +113,8 @@
 }
 
 .kindRelationship {
-  background: #ede9fe;
-  color: var(--celonis-primary-hover);
+  background: #ecfdf5;
+  color: #059669;
 }
 
 .name {

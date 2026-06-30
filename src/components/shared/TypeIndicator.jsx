@@ -1,6 +1,7 @@
+import { ContextModelIcon } from '../icons/ContextModelIcons';
 import styles from './TypeIndicator.module.css';
 
-/** Small shape matching graph node types (object / event / metric). */
+/** Small icon matching graph node types (object / event / metric / process). */
 export default function TypeIndicator({ kind }) {
   const variant =
     kind === 'metric' || kind === 'metrics'
@@ -9,12 +10,19 @@ export default function TypeIndicator({ kind }) {
         ? 'event'
         : kind === 'process'
           ? 'process'
-          : 'object';
+          : kind === 'relationship' || kind === 'relationships'
+            ? 'relationship'
+            : 'object';
+
+  if (variant === 'metric') {
+    return (
+      <span className={`${styles.dot} ${styles.metric}`} aria-hidden />
+    );
+  }
 
   return (
-    <span
-      className={`${styles.dot} ${styles[variant]}`}
-      aria-hidden
-    />
+    <span className={`${styles.iconWrap} ${styles[variant]}`} aria-hidden>
+      <ContextModelIcon kind={variant} size={12} />
+    </span>
   );
 }

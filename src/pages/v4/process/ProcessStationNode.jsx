@@ -1,5 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
+import { EventSourceIcon } from '../../../components/icons/ContextModelIcons';
 import nodeStyles from '../../../components/graph/PerspectiveNode.module.css';
 import styles from './ProcessStationNode.module.css';
 
@@ -9,18 +10,6 @@ const SIDES = [
   { position: Position.Bottom, id: 'bottom' },
   { position: Position.Left, id: 'left' },
 ];
-
-function EventIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden>
-      <path
-        d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"
-        fill="currentColor"
-        opacity="0.9"
-      />
-    </svg>
-  );
-}
 
 function ProcessStationNodeComponent({ data }) {
   const {
@@ -66,7 +55,7 @@ function ProcessStationNodeComponent({ data }) {
           {cmAssetPicker ? (
             <>
               <span className={nodeStyles.cmPickerIcon} aria-hidden>
-                <EventIcon />
+                <EventSourceIcon size={14} monochrome className={styles.iconSvg} />
               </span>
               <span className={`${nodeStyles.cmPickerPlus} ${nodeStyles.cmPickerRaised}`} aria-hidden>
                 +
@@ -79,7 +68,7 @@ function ProcessStationNodeComponent({ data }) {
               </span>
             </>
           ) : (
-            <EventIcon />
+            <EventSourceIcon size={14} monochrome className={styles.iconSvg} />
           )}
         </div>
       </div>

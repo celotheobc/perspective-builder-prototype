@@ -4,22 +4,32 @@
   flex-shrink: 0;
 }
 
+.iconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
 .object {
-  background: #3d8fd9;
-  border-radius: 2px;
+  color: #1b6fd1;
 }
 
 .event {
-  background: #2db87a;
-  border-radius: 2px;
+  color: #2db87a;
+}
+
+.relationship {
+  color: #059669;
+}
+
+.process {
+  color: #7c3aed;
 }
 
 .metric {
   background: #e85a82;
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-}
-
-.process {
-  background: #84cc16;
-  border-radius: 2px;
 }

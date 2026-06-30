@@ -21,6 +21,12 @@
   box-shadow: inset 0 0 0 1px #e8ecf0;
 }
 
+.iconRelationship {
+  background: #ecfdf5;
+  color: #059669;
+  box-shadow: inset 0 0 0 1px #a7f3d0;
+}
+
 .text {
   margin: 0;
   max-width: 200px;

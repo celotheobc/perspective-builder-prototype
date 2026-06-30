@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { agentContextMarkdown, assetMetadata } from '../../../data/mockData';
 import { MetaRows, TextBlock } from './metaPanelParts';
-import { EventSourceSectionIcon, ObjectTypeSectionIcon } from './inventorySectionIcons';
+import { EventSourceIcon, ObjectTypeIcon } from './inventorySectionIcons';
 import styles from './RightInspector.module.css';
 
 const VISIBLE_ROWS = 4;
@@ -145,7 +145,7 @@ export function MetadataTab({
 
       <InventorySection
         title={`Included Objects (${objectRows.length})`}
-        icon={<ObjectTypeSectionIcon />}
+        icon={<ObjectTypeIcon />}
         items={objectRows}
         selectedId={selectedObjectId}
         onSelect={onSelectObject}
@@ -156,7 +156,7 @@ export function MetadataTab({
         title={`Included Event Sources (${eventRows.length})`}
         icon={
           <span className={styles.inventorySectionIconEvent}>
-            <EventSourceSectionIcon />
+            <EventSourceIcon />
           </span>
         }
         items={eventRows}
