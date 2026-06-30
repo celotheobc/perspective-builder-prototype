@@ -18,6 +18,8 @@ export default function ConfigurationModule({
   hideSectionHeader = false,
   canvasUiVariant = 'v1.5',
   hideMetrics = false,
+  emptyStateComponent: EmptyStateComponent = EmptyState,
+  emptyStateProps = {},
 }) {
   const {
     isGlobal,
@@ -51,9 +53,10 @@ export default function ConfigurationModule({
       )}
 
       {isProgressive && !progressive.hasStarted && (
-        <EmptyState
+        <EmptyStateComponent
           onAddObject={progressive.addObject}
           centered={layout === 'canvas'}
+          {...emptyStateProps}
         />
       )}
 

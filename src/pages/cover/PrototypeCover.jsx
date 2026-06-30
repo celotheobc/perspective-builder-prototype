@@ -29,6 +29,13 @@ const VERSIONS = [
       'As v3, plus a Process asset page where you can create a Perspective from the entire process or a selected subset of its objects and events.',
     tag: 'version 4',
   },
+  {
+    id: 'v5',
+    title: 'Panel rebalance + process start',
+    description:
+      'As v4, with included objects/events in the right inspector, diagnostics in the bottom panel, consequence-aware cycle resolution, and start-from-process on the empty perspective screen.',
+    tag: 'version 5',
+  },
 ];
 
 export default function PrototypeCover({ onSelectVersion }) {

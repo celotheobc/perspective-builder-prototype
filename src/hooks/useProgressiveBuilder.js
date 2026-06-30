@@ -278,6 +278,13 @@ export function useProgressiveBuilder(discoveryMode = 'global', options = {}) {
     return undefined;
   }, [autoSuppressSuggestionsOnResolution, cycleActive, connectionPrompt]);
 
+  useEffect(() => {
+    if (cycleActive) {
+      setContextualSelection(null);
+      setLastFocusedNodeId(null);
+    }
+  }, [cycleActive]);
+
   const clearExpansionFocus = useCallback(() => {
     setLastFocusedNodeId(null);
   }, []);
@@ -537,6 +544,19 @@ export function useProgressiveBuilder(discoveryMode = 'global', options = {}) {
     return 'Valid';
   }, [hasStarted, cycleActive]);
 
+  const seedFromAssets = useCallback(
+    (objectIds, eventIds = []) => {
+      setIncludedObjects(new Set(objectIds));
+      setIncludedEvents(new Set(eventIds));
+      setConnectionPrompt(null);
+      setPreviewBridgePathId(null);
+      setPrunedRelationshipIds(new Set());
+      setLastFocusedNodeId(objectIds[0] ?? null);
+      showToast('Perspective seeded from process');
+    },
+    [showToast],
+  );
+
   return {
     discoveryMode,
     hasStarted,
@@ -596,5 +616,6 @@ export function useProgressiveBuilder(discoveryMode = 'global', options = {}) {
     confirmConnectionPath,
     insertConnectionPath,
     keepObjectsUnconnected,
+    seedFromAssets,
   };
 }

@@ -18,6 +18,7 @@ import RightInspector from './inspector/RightInspector';
 import BottomPanel from './panels/BottomPanel';
 import { usePerspectiveSelection } from '../v1_5/selection/usePerspectiveSelection';
 import { buildV2Issues } from '../v1_5/utils/buildV2ViewData';
+import { useClearEntitySelectionOnCycle } from '../../hooks/useClearEntitySelectionOnCycle';
 import styles from '../v1_5/PerspectiveBuilderV1_5.module.css';
 
 export default function PerspectiveBuilderV2({ onVersionChange }) {
@@ -82,16 +83,16 @@ export default function PerspectiveBuilderV2({ onVersionChange }) {
   );
 
   const cycleActive = progressive.cycleActive && !progressive.isCycleResolved;
-  const wasCycleActive = useRef(false);
   const hadConnectionPrompt = useRef(false);
 
-  useEffect(() => {
-    if (cycleActive && !wasCycleActive.current) {
-      selectCanvasWithClearFocus();
+  useClearEntitySelectionOnCycle({
+    cycleActive,
+    selectionType: selection.type,
+    onClear: selectCanvasWithClearFocus,
+    onCycleEnter: () => {
       setRightCollapsed(false);
-    }
-    wasCycleActive.current = cycleActive;
-  }, [cycleActive, selectCanvasWithClearFocus]);
+    },
+  });
 
   useEffect(() => {
     if (progressive.connectionPrompt && !hadConnectionPrompt.current) {

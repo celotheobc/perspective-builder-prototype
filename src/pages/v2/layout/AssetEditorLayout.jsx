@@ -14,6 +14,8 @@ export default function AssetEditorLayout({
   rightInspector,
   bottomPanel,
   hideMetrics = false,
+  emptyStateComponent,
+  emptyStateProps,
 }) {
   return (
     <div className={styles.editor}>
@@ -31,6 +33,8 @@ export default function AssetEditorLayout({
             graphSelection={graphSelection}
             canvasUiVariant="v2"
             hideMetrics={hideMetrics}
+            emptyStateComponent={emptyStateComponent}
+            emptyStateProps={emptyStateProps}
           />
         </main>
         {bottomPanel}

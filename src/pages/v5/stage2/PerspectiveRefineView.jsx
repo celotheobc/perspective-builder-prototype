@@ -10,11 +10,12 @@ import { useGraphBuilderContext } from '../../../hooks/useGraphBuilderContext';
 import { EXPERIENCES } from '../../../data/mockData';
 import AssetEditorLayout from '../../v2/layout/AssetEditorLayout';
 import { usePanelDimensions } from '../../v1_5/layout/usePanelDimensions';
-import RightInspector from '../../v2/inspector/RightInspector';
-import BottomPanelV3 from '../panels/BottomPanelV3';
-import { usePerspectiveSelection } from '../../v1_5/selection/usePerspectiveSelection';
+import RightInspector from '../inspector/RightInspector';
+import BottomPanelV5 from '../panels/BottomPanelV5';
+import { usePerspectiveSelection } from '../selection/usePerspectiveSelection';
 import { buildV2Issues } from '../../v1_5/utils/buildV2ViewData';
-import { useDemoTourOptional } from '../../../components/demoTour/DemoTourContext';
+import EmptyStateV5 from '../components/EmptyStateV5';
+import { getProcessSeed } from '../../v4/data/processPageData';
 import { useClearEntitySelectionOnCycle } from '../../../hooks/useClearEntitySelectionOnCycle';
 import layoutStyles from '../../v1_5/PerspectiveBuilderV1_5.module.css';
 
@@ -22,7 +23,7 @@ export default function PerspectiveRefineView({
   perspectiveName,
   initialObjects = [],
   initialEvents = [],
-  tourActive = false,
+  initialSourceProcessId = null,
 }) {
   const progressive = useProgressiveBuilder('global', {
     unfocusedShowsAllGhosts: true,
@@ -31,6 +32,7 @@ export default function PerspectiveRefineView({
     initialIncludedEvents: initialEvents,
   });
 
+  const [sourceProcessId, setSourceProcessId] = useState(initialSourceProcessId);
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [bottomCollapsed, setBottomCollapsed] = useState(false);
   const { rightWidth, bottomHeight, adjustRightWidth, adjustBottomHeight } =
@@ -80,8 +82,41 @@ export default function PerspectiveRefineView({
     (id) => {
       selectObject(id);
       focusIncludedObject(id);
+      setRightCollapsed(false);
     },
     [selectObject, focusIncludedObject],
+  );
+
+  const handleSelectEvent = useCallback(
+    (id) => {
+      selectEvent(id);
+      setRightCollapsed(false);
+    },
+    [selectEvent],
+  );
+
+  const handleSelectRelationship = useCallback(
+    (id, isCycleEdge = false) => {
+      selectRelationship(id, isCycleEdge);
+      setRightCollapsed(false);
+      setBottomCollapsed(false);
+    },
+    [selectRelationship],
+  );
+
+  const handleSelectIssue = useCallback(() => {
+    selectIssue();
+    setBottomCollapsed(false);
+  }, [selectIssue]);
+
+  const handleStartFromProcess = useCallback(
+    (processId) => {
+      const seed = getProcessSeed(processId);
+      progressive.seedFromAssets(seed.objects, seed.events);
+      setSourceProcessId(processId);
+      selectCanvasWithClearFocus();
+    },
+    [progressive, selectCanvasWithClearFocus],
   );
 
   const cycleActive = progressive.cycleActive && !progressive.isCycleResolved;
@@ -93,6 +128,8 @@ export default function PerspectiveRefineView({
     onClear: selectCanvasWithClearFocus,
     onCycleEnter: () => {
       setRightCollapsed(false);
+      setBottomCollapsed(false);
+      setBottomTab('issues');
     },
   });
 
@@ -126,21 +163,10 @@ export default function PerspectiveRefineView({
     [progressive],
   );
 
-  const objectRows = useMemo(() => {
-    const rows = buildPerspectiveObjectRows(progressive.includedObjects);
-    return rows.map((row) => ({
-      ...row,
-      inPerspectiveRelationships: progressive.activeRelationships.filter(
-        (r) =>
-          progressive.includedRelationshipIds.has(r.id) &&
-          (r.source === row.id || r.target === row.id),
-      ).length,
-    }));
-  }, [
-    progressive.includedObjects,
-    progressive.activeRelationships,
-    progressive.includedRelationshipIds,
-  ]);
+  const objectRows = useMemo(
+    () => buildPerspectiveObjectRows(progressive.includedObjects),
+    [progressive.includedObjects],
+  );
 
   const eventRows = useMemo(
     () => buildPerspectiveEventSourceRows(progressive.includedEvents),
@@ -150,9 +176,7 @@ export default function PerspectiveRefineView({
   const issues = useMemo(() => buildV2Issues(progressive), [progressive]);
 
   const tabCounts = {
-    objects: objectRows.length,
     relationships: relationshipTable.rows.length,
-    events: eventRows.length,
     issues: issues.length,
   };
 
@@ -164,94 +188,60 @@ export default function PerspectiveRefineView({
     highlightedRelationshipId,
   };
 
-  const setRefineState = useDemoTourOptional()?.setRefineState;
-
-  useEffect(() => {
-    if (!setRefineState) return undefined;
-
-    if (!tourActive) {
-      setRefineState(null);
-      return undefined;
-    }
-
-    setRefineState({
-      hasStarted: progressive.hasStarted,
-      includedObjects: progressive.includedObjects,
-      includedEvents: progressive.includedEvents,
-      selection,
-      highlightedRelationshipId,
-      bottomTab,
-      cycleActive: progressive.cycleActive,
-      isCycleResolved: progressive.isCycleResolved,
-      prunedRelationshipIds: progressive.routeExcluded,
-      connectionPrompt: progressive.connectionPrompt,
-      discoveryFilters: progressive.discoveryFilters,
-    });
-  }, [
-    setRefineState,
-    tourActive,
-    progressive.hasStarted,
-    progressive.includedObjects,
-    progressive.includedEvents,
-    progressive.cycleActive,
-    progressive.isCycleResolved,
-    progressive.routeExcluded,
-    progressive.connectionPrompt,
-    progressive.discoveryFilters,
-    selection,
-    highlightedRelationshipId,
-    bottomTab,
-  ]);
-
-  useEffect(() => {
-    if (!setRefineState) return undefined;
-    return () => setRefineState(null);
-  }, [setRefineState]);
-
   return (
     <>
       <div className={layoutStyles.page}>
         <AssetEditorLayout
-            progressive={progressive}
-            graphSelection={graphSelection}
-            highlightedRelationshipId={highlightedRelationshipId}
-            hideMetrics
-            rightInspector={
-              <RightInspector
-                selection={selection}
-                progressive={progressive}
-                validationStatus={validationStatus}
-                collapsed={rightCollapsed}
-                onToggle={() => setRightCollapsed((v) => !v)}
-                width={rightWidth}
-                onResizeWidth={adjustRightWidth}
-                cycleResolution={cycleResolution}
-                onHighlightRelationship={setHighlightedRelationshipId}
-                onSelectRelationship={selectRelationship}
-              />
-            }
-            bottomPanel={
-              <BottomPanelV3
-                activeTab={bottomTab}
-                onTabChange={setBottomTab}
-                collapsed={bottomCollapsed}
-                onToggle={() => setBottomCollapsed((v) => !v)}
-                height={bottomHeight}
-                onResizeHeight={adjustBottomHeight}
-                tabCounts={tabCounts}
-                relationshipRows={relationshipTable.rows}
-                objectRows={objectRows}
-                eventRows={eventRows}
-                issues={issues}
-                selection={selection}
-                onSelectRelationship={selectRelationship}
-                onSelectObject={handleSelectObject}
-                onSelectEvent={selectEvent}
-                onSelectIssue={selectIssue}
-              />
-            }
-          />
-        </div>
+          progressive={progressive}
+          graphSelection={graphSelection}
+          highlightedRelationshipId={highlightedRelationshipId}
+          hideMetrics
+          emptyStateComponent={EmptyStateV5}
+          emptyStateProps={{
+            onStartFromProcess: handleStartFromProcess,
+          }}
+          rightInspector={
+            <RightInspector
+              selection={selection}
+              progressive={progressive}
+              validationStatus={validationStatus}
+              perspectiveName={perspectiveName}
+              objectRows={objectRows}
+              eventRows={eventRows}
+              relationshipCount={relationshipTable.rows.length}
+              issueCount={issues.length}
+              sourceProcessId={sourceProcessId}
+              collapsed={rightCollapsed}
+              onToggle={() => setRightCollapsed((v) => !v)}
+              width={rightWidth}
+              onResizeWidth={adjustRightWidth}
+              cycleResolution={cycleResolution}
+              onHighlightRelationship={setHighlightedRelationshipId}
+              onSelectRelationship={handleSelectRelationship}
+              onSelectObject={handleSelectObject}
+              onSelectEvent={handleSelectEvent}
+            />
+          }
+          bottomPanel={
+            <BottomPanelV5
+              activeTab={bottomTab}
+              onTabChange={setBottomTab}
+              collapsed={bottomCollapsed}
+              onToggle={() => setBottomCollapsed((v) => !v)}
+              height={bottomHeight}
+              onResizeHeight={adjustBottomHeight}
+              tabCounts={tabCounts}
+              relationshipRows={relationshipTable.rows}
+              issues={issues}
+              selection={selection}
+              onSelectRelationship={handleSelectRelationship}
+              onSelectIssue={handleSelectIssue}
+              onHoverRelationship={setHighlightedRelationshipId}
+              perspectiveEmpty={!progressive.hasStarted}
+            />
+          }
+        />
+      </div>
       <Toast toast={progressive.toast} />
     </>
   );

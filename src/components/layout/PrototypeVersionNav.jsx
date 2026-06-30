@@ -6,6 +6,7 @@ const VERSIONS = [
   { id: 'v2', short: 'v2', title: 'Asset layout exploration' },
   { id: 'v3', short: 'v3', title: 'Create from Context Model' },
   { id: 'v4', short: 'v4', title: 'Create Perspective from Process' },
+  { id: 'v5', short: 'v5', title: 'Panel rebalance + process start' },
 ];
 
 export default function PrototypeVersionPicker({ version, onVersionChange }) {

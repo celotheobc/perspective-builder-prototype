@@ -131,6 +131,8 @@ export default function PerspectiveGraph({
       graphContext.pendingObjectId ?? '',
       [...(graphContext.previewBridgeRelationshipIds ?? [])].sort().join(','),
       graphContext.previewBridgeWouldCreateCycle ? 'cycle' : 'safe',
+      graphContext.cycleActive ? 'cycle-on' : 'cycle-off',
+      graphContext.isResolved ? 'resolved' : 'unresolved',
       graphContext.highlightedRelationshipId ?? '',
       graphContext.inspectorSelection?.type ?? '',
       graphContext.inspectorSelection?.id ?? '',
@@ -151,6 +153,8 @@ export default function PerspectiveGraph({
     graphContext.pendingObjectId,
     graphContext.previewBridgeRelationshipIds,
     graphContext.previewBridgeWouldCreateCycle,
+    graphContext.cycleActive,
+    graphContext.isResolved,
     graphContext.highlightedRelationshipId,
     graphContext.inspectorSelection,
   ]);
@@ -393,6 +397,10 @@ export default function PerspectiveGraph({
 
   const onNodeClick = useCallback(
     (_event, node) => {
+      const ctx = graphContextRef.current;
+      if (ctx.cycleActive && !ctx.isResolved) {
+        return;
+      }
       if (graphSelection?.onSelectNode) {
         const kind =
           node.id.startsWith('event-')
@@ -427,6 +435,10 @@ export default function PerspectiveGraph({
       const isCycleEdge = Boolean(
         edge.data?.highlightCycle || edge.data?.showScissors,
       );
+      const ctx = graphContextRef.current;
+      if (ctx.cycleActive && !ctx.isResolved && !isCycleEdge) {
+        return;
+      }
       graphSelection.onSelectEdge({ id: relId, isCycleEdge });
     },
     [graphSelection],

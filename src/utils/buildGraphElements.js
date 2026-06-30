@@ -178,7 +178,10 @@ export function buildProgressiveGraph(ctx) {
         onPrune: ctx.onPrune,
         highlightFromTable,
         highlightFromTableCycle,
-        isInspectorSelected: getInspectorEdgeSelected(r.id, ctx.inspectorSelection),
+        isInspectorSelected: getInspectorEdgeSelected(r.id, ctx.inspectorSelection, {
+          cycleActive: ctx.cycleActive,
+          isResolved: ctx.isResolved,
+        }),
         ...cycleFlags,
       },
     });
@@ -315,7 +318,10 @@ export function buildRouteAmbiguityGraph(ctx) {
         relId: r.id,
         highlightFromTable,
         highlightFromTableCycle,
-        isInspectorSelected: getInspectorEdgeSelected(r.id, ctx.inspectorSelection),
+        isInspectorSelected: getInspectorEdgeSelected(r.id, ctx.inspectorSelection, {
+          cycleActive: ctx.cycleActive,
+          isResolved: ctx.isResolved,
+        }),
         ...cycleFlags,
       },
     });
