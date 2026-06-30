@@ -22,6 +22,13 @@ const VERSIONS = [
       'As v2, but with a new two-stage flow: select assets from the wider Context Model, then refine the resulting Perspective.',
     tag: 'version 3',
   },
+  {
+    id: 'v4',
+    title: 'Create Perspective from Process',
+    description:
+      'As v3, plus a Process asset page where you can create a Perspective from the entire process or a selected subset of its objects and events.',
+    tag: 'version 4',
+  },
 ];
 
 export default function PrototypeCover({ onSelectVersion }) {

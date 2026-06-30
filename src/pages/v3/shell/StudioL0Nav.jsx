@@ -27,7 +27,7 @@ function StudioGlyph({ glyph }) {
   return <span className={styles.glyph}>{glyph}</span>;
 }
 
-export default function StudioL0Nav({ onVersionChange }) {
+export default function StudioL0Nav({ onVersionChange, version = 'v3' }) {
   const { open, setOpen } = useDemoTour();
   const [hintReady, setHintReady] = useState(false);
   const [hintDismissed, setHintDismissed] = useState(false);
@@ -61,7 +61,7 @@ export default function StudioL0Nav({ onVersionChange }) {
       <button type="button" className={styles.item} aria-label="Settings" title="Settings">
         <span className={styles.glyph}>⚙</span>
       </button>
-      <PrototypeVersionPicker version="v3" onVersionChange={onVersionChange} />
+      <PrototypeVersionPicker version={version} onVersionChange={onVersionChange} />
       <div className={styles.avatarWrap}>
         <button
           type="button"
