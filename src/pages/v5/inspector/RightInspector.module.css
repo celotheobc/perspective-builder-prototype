@@ -217,46 +217,104 @@
   color: #1e293b;
 }
 
+.inventorySection {
+  margin-top: 24px;
+}
+
+.inventorySectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.inventorySectionIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: #5eb0ff;
+}
+
+.inventorySectionIconEvent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: #2db87a;
+}
+
+.inventorySectionTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #0f172a;
+}
+
+.inventoryIconSvg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.inventoryEmpty {
+  margin: 0;
+  font-size: 13px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
 .inventoryTableWrap {
-  border: 1px solid #e5e7eb;
-  border-radius: 5px;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
   overflow: hidden;
+  background: #fff;
 }
 
-.inventoryTable {
+.inventoryList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inventoryItem {
+  display: block;
   width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-
-.inventoryTable td {
-  padding: 5px 10px;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 1px solid #e8edf3;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.35;
   color: #1e293b;
-}
-
-.inventoryTable tr:last-child td {
-  border-bottom: none;
-}
-
-.inventoryRow {
+  text-align: left;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
-.inventoryRow:hover,
-.inventoryRowActive {
-  background: #eff6ff;
+.inventoryList li:last-child .inventoryItem {
+  border-bottom: none;
+}
+
+.inventoryItem:hover,
+.inventoryItemActive {
+  background: #f4f8fc;
 }
 
 .showMoreBtn {
   display: block;
   width: 100%;
-  margin-top: 4px;
-  padding: 4px 0;
+  margin-top: 8px;
+  padding: 0;
   border: none;
   background: transparent;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   color: #1b6fd1;
   cursor: pointer;

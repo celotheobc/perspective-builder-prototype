@@ -40,7 +40,7 @@ export function usePerspectiveSelection() {
       id,
     });
     setHighlightedRelationshipId(id);
-    setBottomTab(isCycleEdge ? 'issues' : 'relationships');
+    setBottomTab('relationships');
   }, []);
 
   const selectIssue = useCallback(() => {

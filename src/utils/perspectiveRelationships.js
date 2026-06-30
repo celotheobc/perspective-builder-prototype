@@ -21,6 +21,10 @@ export function formatObjectEventLinkName(objectName, eventName) {
   return `${objectName} to ${eventName}`;
 }
 
+export function formatRelationshipDisplayName(metaName, sourceName, targetName) {
+  return relationshipDisplayName(sourceName, targetName, metaName);
+}
+
 export function buildPerspectiveRelationshipRows(activeRelationships, includedObjects) {
   if (!includedObjects?.size) return [];
 

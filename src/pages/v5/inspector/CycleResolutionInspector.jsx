@@ -23,7 +23,7 @@ function ConsequenceBullets({ bullets }) {
           className={styles.consequenceShowMore}
           onClick={() => setExpanded((v) => !v)}
         >
-          {expanded ? 'Show less' : `Show more (${bullets.length - MAX_VISIBLE_BULLETS})`}
+          {expanded ? 'Show less' : 'Show all'}
         </button>
       )}
     </>

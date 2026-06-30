@@ -139,7 +139,6 @@ export default function PerspectiveRefineView({
     onCycleEnter: () => {
       setRightCollapsed(false);
       setBottomCollapsed(false);
-      setBottomTab('issues');
     },
   });
 
@@ -183,7 +182,10 @@ export default function PerspectiveRefineView({
     [progressive.includedEvents],
   );
 
-  const issues = useMemo(() => buildV2Issues(progressive), [progressive]);
+  const issues = useMemo(
+    () => buildV2Issues(progressive).filter((issue) => issue.id !== 'cycle-multiple-paths'),
+    [progressive],
+  );
 
   const tabCounts = {
     relationships: relationshipTable.rows.length,

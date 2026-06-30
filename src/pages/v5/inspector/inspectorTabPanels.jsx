@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { agentContextMarkdown, assetMetadata } from '../../../data/mockData';
 import { MetaRows, TextBlock } from './metaPanelParts';
+import { EventSourceSectionIcon, ObjectTypeSectionIcon } from './inventorySectionIcons';
 import styles from './RightInspector.module.css';
 
 const VISIBLE_ROWS = 4;
@@ -38,35 +39,27 @@ export function InventoryTable({ items, selectedId, onSelect, emptyLabel }) {
   const visible = expanded || !hasOverflow ? items : items.slice(0, VISIBLE_ROWS);
 
   if (!items.length) {
-    return <p className={styles.muted}>{emptyLabel}</p>;
+    return <p className={styles.inventoryEmpty}>{emptyLabel}</p>;
   }
 
   return (
     <>
       <div className={styles.inventoryTableWrap}>
-        <table className={styles.inventoryTable}>
-          <tbody>
-            {visible.map((item) => (
-              <tr
-                key={item.id}
-                className={`${styles.inventoryRow} ${
-                  selectedId === item.id ? styles.inventoryRowActive : ''
+        <ul className={styles.inventoryList}>
+          {visible.map((item) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                className={`${styles.inventoryItem} ${
+                  selectedId === item.id ? styles.inventoryItemActive : ''
                 }`}
                 onClick={() => onSelect(item.id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onSelect(item.id);
-                  }
-                }}
-                tabIndex={0}
-                role="button"
               >
-                <td>{item.name}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                {item.name}
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
       {hasOverflow && (
         <button
@@ -74,10 +67,29 @@ export function InventoryTable({ items, selectedId, onSelect, emptyLabel }) {
           className={styles.showMoreBtn}
           onClick={() => setExpanded((v) => !v)}
         >
-          {expanded ? 'Show less' : `Show more (${items.length - VISIBLE_ROWS})`}
+          {expanded ? 'Show less' : 'Show all'}
         </button>
       )}
     </>
+  );
+}
+
+function InventorySection({ title, icon, items, selectedId, onSelect, emptyLabel }) {
+  return (
+    <section className={styles.inventorySection}>
+      <div className={styles.inventorySectionHeader}>
+        <span className={styles.inventorySectionIcon} aria-hidden>
+          {icon}
+        </span>
+        <h3 className={styles.inventorySectionTitle}>{title}</h3>
+      </div>
+      <InventoryTable
+        items={items}
+        selectedId={selectedId}
+        onSelect={onSelect}
+        emptyLabel={emptyLabel}
+      />
+    </section>
   );
 }
 
@@ -131,16 +143,22 @@ export function MetadataTab({
         {agentExcerpt}
       </TextBlock>
 
-      <h3 className={styles.sectionTitle}>Included Objects ({objectRows.length})</h3>
-      <InventoryTable
+      <InventorySection
+        title={`Included Objects (${objectRows.length})`}
+        icon={<ObjectTypeSectionIcon />}
         items={objectRows}
         selectedId={selectedObjectId}
         onSelect={onSelectObject}
         emptyLabel="None included yet"
       />
 
-      <h3 className={styles.sectionTitle}>Included Event Sources ({eventRows.length})</h3>
-      <InventoryTable
+      <InventorySection
+        title={`Included Event Sources (${eventRows.length})`}
+        icon={
+          <span className={styles.inventorySectionIconEvent}>
+            <EventSourceSectionIcon />
+          </span>
+        }
         items={eventRows}
         selectedId={selectedEventId}
         onSelect={onSelectEvent}
