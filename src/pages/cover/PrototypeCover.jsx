@@ -36,6 +36,13 @@ const VERSIONS = [
       'As v4, with included objects/events in the right inspector, diagnostics in the bottom panel, consequence-aware cycle resolution, and start-from-process on the empty perspective screen.',
     tag: 'version 5',
   },
+  {
+    id: 'v6',
+    title: 'Inventory placement experiment',
+    description:
+      'Same as v5, with renamed inspector tabs (Overview / Inspect) and a prototype toggle to compare side-panel vs bottom-panel inventory placement.',
+    tag: 'version 6',
+  },
 ];
 
 export default function PrototypeCover({ onSelectVersion }) {

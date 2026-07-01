@@ -305,6 +305,37 @@ function layoutEventAndMetricNodes(nodes, edges, positions, objectIncluded) {
   placeLane(metricIds, metricLaneY);
 }
 
+/** Place newly visible discovery nodes using on-canvas anchor positions. */
+export function repositionDiscoveryNodes(
+  nodes,
+  savedPositions,
+  edges,
+  includedObjects,
+  layoutOptions = {},
+) {
+  const objectIncluded = includedObjects ?? new Set();
+  const positions = {};
+
+  for (const n of nodes) {
+    const saved = savedPositions.get(n.id);
+    if (saved) positions[n.id] = { ...saved };
+  }
+
+  layoutEventAndMetricNodes(nodes, edges, positions, objectIncluded);
+
+  for (const n of nodes) {
+    if (positions[n.id]) continue;
+    if (n.id.startsWith('event-') || n.id.startsWith('metric-')) continue;
+    positions[n.id] =
+      ghostPosition(n.id, objectIncluded, positions, layoutOptions) ?? n.position;
+  }
+
+  return nodes.map((n) => ({
+    ...n,
+    position: positions[n.id] ?? n.position,
+  }));
+}
+
 function withLayoutMeta(nodes, focalId) {
   return nodes.map((n) => ({
     ...n,

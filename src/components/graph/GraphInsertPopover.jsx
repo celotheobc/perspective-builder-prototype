@@ -38,6 +38,7 @@ export default function GraphInsertPopover({
   align = 'left',
   objectOptions,
   placeholder,
+  showProcessFilter = false,
 }) {
   const [open, setOpen] = useState(false);
   const [createRelationshipOpen, setCreateRelationshipOpen] = useState(false);
@@ -77,32 +78,40 @@ export default function GraphInsertPopover({
   }, [open, createRelationshipOpen, close, closeCreateRelationship]);
 
   const resolvedHint =
-    hint !== undefined
-      ? hint
-      : lockedScope
-        ? SCOPE_HINTS[lockedScope]
-        : showLabel
-          ? null
-          : DEFAULT_HINT;
+    variant === 'expansion'
+      ? null
+      : hint !== undefined
+        ? hint
+        : lockedScope
+          ? SCOPE_HINTS[lockedScope]
+          : showLabel
+            ? null
+            : DEFAULT_HINT;
   const resolvedPlaceholder =
     placeholder ??
-    (lockedScope
-      ? SCOPE_PLACEHOLDERS[lockedScope]
-      : showLabel
-        ? 'Search to add — connected or not…'
-        : 'Search objects, events, and metrics…');
+    (variant === 'expansion'
+      ? 'Search objects and events…'
+      : lockedScope
+        ? SCOPE_PLACEHOLDERS[lockedScope]
+        : showLabel
+          ? 'Search to add — connected or not…'
+          : 'Search objects, events, and metrics…');
   const resolvedAria =
     ariaLabel ??
-    (lockedScope
-      ? SCOPE_ARIA[lockedScope]
-      : showLabel
-        ? 'Search and add anything to perspective'
-        : 'Add object, event, or metric to perspective');
+    (variant === 'expansion'
+      ? 'Add to perspective'
+      : lockedScope
+        ? SCOPE_ARIA[lockedScope]
+        : showLabel
+          ? 'Search and add anything to perspective'
+          : 'Add object, event, or metric to perspective');
 
   const triggerClass = [
     styles.trigger,
     variant === 'header' ? styles.triggerHeader : '',
-    showLabel ? styles.triggerLabeled : '',
+    variant === 'toolbar' ? styles.triggerToolbar : '',
+    variant === 'expansion' ? styles.triggerExpansion : '',
+    showLabel || variant === 'expansion' ? styles.triggerLabeled : '',
     open ? styles.triggerOpen : '',
   ]
     .filter(Boolean)
@@ -110,15 +119,21 @@ export default function GraphInsertPopover({
 
   const popoverClass = [
     styles.popover,
-    showLabel ? styles.popoverWide : '',
+    showLabel || variant === 'expansion' ? styles.popoverWide : '',
     align === 'right' ? styles.popoverAlignRight : '',
     variant === 'header' ? styles.popoverHeader : '',
+    variant === 'expansion' ? styles.popoverExpansion : '',
   ]
     .filter(Boolean)
     .join(' ');
 
+  const showTriggerLabel = showLabel || variant === 'expansion';
+
   return (
-    <div className={styles.root} ref={rootRef}>
+    <div
+      className={`${styles.root} ${variant === 'expansion' ? styles.rootExpansion : ''}`}
+      ref={rootRef}
+    >
       <button
         type="button"
         className={triggerClass}
@@ -127,7 +142,7 @@ export default function GraphInsertPopover({
         aria-haspopup="dialog"
         onClick={() => setOpen((v) => !v)}
       >
-        {showLabel ? (
+        {showTriggerLabel ? (
           <>
             <span className={styles.triggerIcon} aria-hidden>
               +
@@ -153,14 +168,16 @@ export default function GraphInsertPopover({
             onClose={close}
             placeholder={resolvedPlaceholder}
             flatResults={flatResults || showLabel}
+            showProcessFilter={showProcessFilter}
+            variant={variant === 'expansion' ? 'expansion' : 'default'}
           />
-          <div className={styles.createRow}>
+          <div className={variant === 'expansion' ? styles.createRowExpansion : styles.createRow}>
             <button
               type="button"
               className={styles.createBtn}
               onClick={() => setCreateRelationshipOpen(true)}
             >
-              Create Relationship
+              {variant === 'expansion' ? 'Create Relationship…' : 'Create Relationship'}
             </button>
           </div>
         </div>

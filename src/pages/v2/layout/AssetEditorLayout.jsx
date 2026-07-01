@@ -16,6 +16,8 @@ export default function AssetEditorLayout({
   hideMetrics = false,
   emptyStateComponent,
   emptyStateProps,
+  combinedCanvasToolbar = false,
+  showProcessFilter = false,
 }) {
   return (
     <div className={styles.editor}>
@@ -35,6 +37,8 @@ export default function AssetEditorLayout({
             hideMetrics={hideMetrics}
             emptyStateComponent={emptyStateComponent}
             emptyStateProps={emptyStateProps}
+            combinedCanvasToolbar={combinedCanvasToolbar}
+            showProcessFilter={showProcessFilter}
           />
         </main>
         {bottomPanel}

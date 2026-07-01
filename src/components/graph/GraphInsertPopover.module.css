@@ -2,6 +2,11 @@
   position: relative;
 }
 
+.rootExpansion {
+  width: auto;
+  flex-shrink: 0;
+}
+
 .trigger {
   width: 36px;
   height: 36px;
@@ -99,6 +104,16 @@
   min-width: 340px;
 }
 
+.triggerToolbar {
+  box-shadow: none;
+  border-color: #c7dcf5;
+}
+
+.triggerToolbar:hover,
+.triggerToolbar.triggerOpen {
+  box-shadow: none;
+}
+
 .popoverHeader {
   min-width: 320px;
 }
@@ -127,4 +142,42 @@
 .createBtn:hover {
   border-color: var(--celonis-primary);
   background: var(--celonis-primary-light);
+}
+
+.triggerExpansion {
+  width: auto;
+  height: 32px;
+  padding: 0 10px;
+  justify-content: center;
+  border-radius: 7px;
+  border-color: transparent;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--celonis-text);
+  background: transparent;
+}
+
+.triggerExpansion:hover,
+.triggerExpansion.triggerOpen {
+  border-color: #d8dee6;
+  background: #f4f6f8;
+  box-shadow: none;
+  color: var(--celonis-text);
+}
+
+.triggerExpansion .triggerIcon {
+  color: var(--celonis-primary);
+  font-size: 1.1rem;
+}
+
+.popoverExpansion {
+  width: 320px;
+  padding: 12px;
+}
+
+.createRowExpansion {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #eef1f5;
 }

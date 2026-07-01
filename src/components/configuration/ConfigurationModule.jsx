@@ -20,6 +20,8 @@ export default function ConfigurationModule({
   hideMetrics = false,
   emptyStateComponent: EmptyStateComponent = EmptyState,
   emptyStateProps = {},
+  combinedCanvasToolbar = false,
+  showProcessFilter = false,
 }) {
   const {
     isGlobal,
@@ -75,6 +77,8 @@ export default function ConfigurationModule({
               showInsertPopover={progressive.hasStarted}
               fillContainer={fillGraph}
               graphSelection={graphSelection}
+              combinedCanvasToolbar={combinedCanvasToolbar}
+              showProcessFilter={showProcessFilter}
               contextualDiscovery={
                 isContextual
                   ? {
@@ -87,7 +91,7 @@ export default function ConfigurationModule({
               }
               canvasControls={{
                 variant: canvasUiVariant,
-                discovery: isGlobal
+                discovery: isGlobal && progressive.hasStarted
                   ? {
                       filters: progressive.discoveryFilters,
                       onToggle: progressive.toggleDiscoveryFilter,

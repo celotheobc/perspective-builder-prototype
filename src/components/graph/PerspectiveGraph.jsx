@@ -12,13 +12,14 @@ import PerspectiveNode from './PerspectiveNode';
 import RouteEdge from './RouteEdge';
 import GraphConnectionOverlay from './GraphConnectionOverlay';
 import GraphInsertPopover from './GraphInsertPopover';
+import PerspectiveExpansionPanel from './PerspectiveExpansionPanel';
 import ContextualDiscoveryMenu from './ContextualDiscoveryMenu';
 import GraphCanvasControls from './GraphCanvasControls';
 import {
   buildProgressiveGraph,
   buildRouteAmbiguityGraph,
 } from '../../utils/buildGraphElements';
-import { applyDemoLayout } from '../../utils/demoLayout';
+import { applyDemoLayout, repositionDiscoveryNodes } from '../../utils/demoLayout';
 import { enrichEdgesWithHandles, positionsFromNodes } from '../../utils/edgeHandles';
 import {
   buildIncludedIdSet,
@@ -72,6 +73,8 @@ export default function PerspectiveGraph({
   fillContainer = false,
   graphSelection = null,
   hideMetrics = false,
+  combinedCanvasToolbar = false,
+  showProcessFilter = false,
 }) {
   const savedPositions = useRef(new Map());
   const canvasRef = useRef(null);
@@ -185,7 +188,7 @@ export default function PerspectiveGraph({
         includedObjects.has('sales-order') &&
         addableObjects.size > 0;
 
-      const fitKey = `${hubRingView}|${[...frameIds].sort().join(',')}|${nextNodes.length}`;
+      const fitKey = `${hubRingView}|${[...frameIds].sort().join(',')}`;
       const needsFit = forceFit || topologyChanged || fitKey !== lastFitKey.current;
       if (!needsFit) return;
 
@@ -234,11 +237,16 @@ export default function PerspectiveGraph({
       }
 
       const layoutOptions = {
-        cycleActive: ctx.cycleActive,
-        isResolved: ctx.isResolved,
+        cycleLayout: ctx.cycleActive && !ctx.isResolved,
+        pendingObjectId: ctx.pendingObjectId ?? null,
+        expansionAnchorId: ctx.expansionAnchorId ?? null,
       };
 
       let nextNodes = rawNodes;
+      const hasNewDiscoveryNodes = rawNodes.some(
+        (n) => !savedPositions.current.has(n.id),
+      );
+
       if (force) {
         nextNodes = applyDemoLayout(
           rawNodes,
@@ -248,12 +256,25 @@ export default function PerspectiveGraph({
           ctx.includedObjects,
           layoutOptions,
         );
+      } else if (relationshipsOnly && hasNewDiscoveryNodes) {
+        nextNodes = repositionDiscoveryNodes(
+          rawNodes,
+          savedPositions.current,
+          rawEdges,
+          ctx.includedObjects ?? new Set(),
+          layoutOptions,
+        );
+        nextNodes.forEach((n) => {
+          if (!savedPositions.current.has(n.id)) {
+            savedPositions.current.set(n.id, { ...n.position });
+          }
+        });
+      } else {
+        nextNodes = rawNodes.map((n) => {
+          const saved = savedPositions.current.get(n.id);
+          return saved ? { ...n, position: { ...saved } } : n;
+        });
       }
-
-      nextNodes = nextNodes.map((n) => {
-        const saved = savedPositions.current.get(n.id);
-        return saved ? { ...n, position: { ...saved } } : n;
-      });
 
       const positioned = positionsFromNodes(nextNodes);
       setEdges(enrichEdgesWithHandles(rawEdges, positioned));
@@ -264,9 +285,10 @@ export default function PerspectiveGraph({
         nodesRef.current.length > 0 &&
         !animatingRef.current;
 
-      const nodesToSet = initialRevealDone.current
-        ? nextNodes
-        : stripNodeMotion(nextNodes);
+      const nodesToSet =
+        !initialRevealDone.current || relationshipsOnly
+          ? stripNodeMotion(nextNodes)
+          : nextNodes;
 
       if (shouldAnimate) {
         animatingRef.current = true;
@@ -307,7 +329,7 @@ export default function PerspectiveGraph({
           }),
         );
         if (vp) setDefaultViewport(vp);
-        lastFitKey.current = `${hubRingView}|${[...frameIds].sort().join(',')}|${nextNodes.length}`;
+        lastFitKey.current = `${hubRingView}|${[...frameIds].sort().join(',')}`;
         initialRevealDone.current = true;
       } else {
         updateViewport(nextNodes, { forceFit: force, topologyChanged });
@@ -502,22 +524,34 @@ export default function PerspectiveGraph({
         <div className={styles.canvasFlow}>
           <div className={styles.canvasTopLeft}>
             {showInsertPopover && graphContext.onAddObject && !showCycleOverlay && (
-              <GraphInsertPopover
-                onAddObject={graphContext.onAddObject}
-                onAddEvent={graphContext.onAddEvent}
-                onAddMetric={hideMetrics ? undefined : graphContext.onAddMetric}
-                placeholder={
-                  hideMetrics ? 'Search objects and events…' : undefined
-                }
-                showLabel={canvasUiVariant === 'v2'}
-              />
+              combinedCanvasToolbar && canvasControls?.discovery ? (
+                <PerspectiveExpansionPanel
+                  onAddObject={graphContext.onAddObject}
+                  onAddEvent={graphContext.onAddEvent}
+                  onAddMetric={hideMetrics ? undefined : graphContext.onAddMetric}
+                  hideMetrics={hideMetrics}
+                  discovery={canvasControls.discovery}
+                  showProcessFilter={showProcessFilter}
+                />
+              ) : (
+                <GraphInsertPopover
+                  onAddObject={graphContext.onAddObject}
+                  onAddEvent={graphContext.onAddEvent}
+                  onAddMetric={hideMetrics ? undefined : graphContext.onAddMetric}
+                  placeholder={
+                    hideMetrics ? 'Search objects and events…' : undefined
+                  }
+                  showLabel={canvasUiVariant === 'v2'}
+                  showProcessFilter={showProcessFilter}
+                />
+              )
             )}
             {focalLabel && (
               <span className={styles.focalTag}>{focalLabel}</span>
             )}
           </div>
 
-          {canvasControls?.discovery && (
+          {!combinedCanvasToolbar && canvasControls?.discovery && (
             <div
               className={`${styles.canvasTopRight} ${hideMetrics ? styles.canvasTopRightCompact : ''}`}
             >

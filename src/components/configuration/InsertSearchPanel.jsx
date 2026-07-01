@@ -6,6 +6,11 @@ import {
   relationships,
   relationshipTableMeta,
 } from '../../data/mockData';
+import {
+  ENTIRE_CONTEXT_MODEL_LABEL,
+  getProcessAssetIds,
+  PROCESS_FILTER_OPTIONS,
+} from '../../utils/processInventory';
 import styles from './InsertSearchPanel.module.css';
 
 const SCOPES = [
@@ -38,9 +43,12 @@ export default function InsertSearchPanel({
   lockedScope = null,
   placeholder = 'Search objects, events, and metrics…',
   flatResults = false,
+  showProcessFilter = false,
+  variant = 'default',
 }) {
   const [query, setQuery] = useState('');
   const [scope, setScope] = useState(lockedScope ?? 'all');
+  const [processFilter, setProcessFilter] = useState('');
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -52,12 +60,15 @@ export default function InsertSearchPanel({
     const match = (name, domain) =>
       !q || name.toLowerCase().includes(q) || domain.toLowerCase().includes(q);
 
+    const { objectIds, eventIds } = getProcessAssetIds(processFilter);
+
     const items = [];
     const defaultLimit = scope === 'all' ? 10 : 8;
 
     if (scope === 'all' || scope === 'object') {
       objects
         .filter((o) => match(o.name, o.domain))
+        .filter((o) => !objectIds || objectIds.has(o.id))
         .forEach((o) => {
           items.push({ kind: 'object', id: o.id, name: o.name, domain: o.domain, meta: o });
         });
@@ -66,6 +77,7 @@ export default function InsertSearchPanel({
     if (scope === 'all' || scope === 'event') {
       eventSources
         .filter((e) => match(e.name, e.domain))
+        .filter((e) => !eventIds || eventIds.has(e.id))
         .forEach((e) => {
           items.push({ kind: 'event', id: e.id, name: e.name, domain: e.domain });
         });
@@ -103,7 +115,7 @@ export default function InsertSearchPanel({
 
     const sorted = items.sort((a, b) => a.name.localeCompare(b.name));
     return q ? sorted : sorted.slice(0, defaultLimit);
-  }, [query, scope, onSelectRelationship, onSelectMetric]);
+  }, [query, scope, processFilter, onSelectRelationship, onSelectMetric]);
 
   const handlePick = (item) => {
     if (item.kind === 'object') {
@@ -133,9 +145,19 @@ export default function InsertSearchPanel({
     return 'Object';
   };
 
+  const isExpansion = variant === 'expansion';
+  const resultsClassName = [
+    styles.results,
+    flatResults || isExpansion ? styles.resultsFlat : '',
+    isExpansion ? styles.resultsExpansion : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   const visibleScopes = lockedScope
     ? []
     : SCOPES.filter((s) => {
+        if (isExpansion && (s.id === 'relationship' || s.id === 'metric')) return false;
         if (s.id === 'relationship' && !onSelectRelationship) return false;
         if (s.id === 'object' && !onSelectObject) return false;
         if (s.id === 'event' && !onSelectEvent) return false;
@@ -143,8 +165,15 @@ export default function InsertSearchPanel({
         return true;
       });
 
+  const panelClass = [
+    styles.panel,
+    isExpansion ? styles.panelExpansion : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <div className={styles.panel}>
+    <div className={panelClass}>
       <input
         ref={inputRef}
         type="search"
@@ -155,6 +184,41 @@ export default function InsertSearchPanel({
         aria-label="Search to insert"
         aria-haspopup="listbox"
       />
+
+      {showProcessFilter && (
+        <div className={isExpansion ? styles.searchWithinRow : styles.processRow}>
+          <label
+            className={isExpansion ? styles.searchWithinLabel : styles.processLabel}
+            htmlFor="insert-process-filter"
+          >
+            {isExpansion ? 'Search within' : 'Process'}
+          </label>
+          <select
+            id="insert-process-filter"
+            className={isExpansion ? styles.searchWithinSelect : styles.processSelect}
+            value={processFilter}
+            onChange={(e) => setProcessFilter(e.target.value)}
+            aria-label={isExpansion ? 'Search within' : 'Process filter'}
+          >
+            <option value="">{isExpansion ? ENTIRE_CONTEXT_MODEL_LABEL : 'All processes'}</option>
+            {isExpansion ? (
+              <optgroup label="Processes">
+                {PROCESS_FILTER_OPTIONS.map((process) => (
+                  <option key={process.id} value={process.id}>
+                    {process.label}
+                  </option>
+                ))}
+              </optgroup>
+            ) : (
+              PROCESS_FILTER_OPTIONS.map((process) => (
+                <option key={process.id} value={process.id}>
+                  {process.label}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+      )}
 
       {visibleScopes.length > 1 && (
         <div className={styles.scopeRow} role="group" aria-label="Search scope">
@@ -173,10 +237,7 @@ export default function InsertSearchPanel({
       )}
 
       {results.length > 0 ? (
-        <ul
-          className={`${styles.results} ${flatResults ? styles.resultsFlat : ''}`}
-          role="listbox"
-        >
+        <ul className={resultsClassName} role="listbox">
           {results.map((item) => (
             <li key={`${item.kind}-${item.id}`}>
               <button
@@ -197,7 +258,9 @@ export default function InsertSearchPanel({
           ))}
         </ul>
       ) : (
-        <p className={styles.empty}>No matches — try another term or scope.</p>
+        <p className={styles.empty}>
+          {isExpansion ? 'No matches — try another search term.' : 'No matches — try another term or scope.'}
+        </p>
       )}
     </div>
   );

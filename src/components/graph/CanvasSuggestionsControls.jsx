@@ -19,14 +19,57 @@ export default function CanvasSuggestionsControls({
   onToggleType,
   disabled,
   hideMetrics = false,
+  embedded = false,
+  variant = 'default',
 }) {
   const typeOptions = hideMetrics
     ? TYPE_OPTIONS.filter((opt) => opt.id !== 'metrics')
     : TYPE_OPTIONS;
 
+  if (variant === 'expansion') {
+    return (
+      <div
+        className={`${styles.expansionBar} ${showSuggestions ? styles.expansionBarExpanded : ''}`}
+        role="group"
+        aria-label="Graph suggestions"
+      >
+        <label className={styles.expansionToggle}>
+          <span className={styles.expansionToggleText}>Suggestions</span>
+          <input
+            type="checkbox"
+            checked={showSuggestions}
+            disabled={disabled}
+            onChange={(e) => onToggleShowSuggestions(e.target.checked)}
+          />
+          <span className={styles.expansionTrack} aria-hidden />
+        </label>
+        <div className={styles.expansionFilters} aria-hidden={!showSuggestions}>
+          <div className={styles.expansionFiltersInner}>
+            <div className={styles.expansionTypes} role="group" aria-label="Suggestion types">
+              {typeOptions.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  className={`${filters[opt.id] ? styles.typeOn : styles.typeOff} ${styles.expansionTypeChip}`}
+                  aria-pressed={filters[opt.id]}
+                  disabled={disabled || !showSuggestions}
+                  tabIndex={showSuggestions ? 0 : -1}
+                  onClick={() => onToggleType(opt.id)}
+                >
+                  <TypeIndicator kind={opt.kind} />
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
-      className={`${styles.panel} ${hideMetrics ? styles.panelCompact : ''}`}
+      className={`${embedded ? '' : styles.panel} ${!embedded && hideMetrics ? styles.panelCompact : ''}`}
       role="group"
       aria-label="Graph suggestions"
     >
