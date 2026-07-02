@@ -19,19 +19,15 @@ export default function StudioL0NavV6({ onVersionChange }) {
       <button
         type="button"
         className={`${v6Styles.placementTrigger} ${bottomMode ? v6Styles.placementRotated : ''}`}
-        aria-label={
-          bottomMode
-            ? 'Inventory in bottom panel — switch to side panel'
-            : 'Inventory in side panel — switch to bottom panel'
-        }
-        title={
-          bottomMode
-            ? 'Inventory: bottom panel (click for side)'
-            : 'Inventory: side panel (click for bottom)'
-        }
+        aria-label={`Test alternative inventory layout. Currently inventory in ${bottomMode ? 'bottom' : 'side'} panel.`}
+        title="Test alternative inventory layout"
         aria-pressed={bottomMode}
         onClick={togglePlacement}
-      />
+      >
+        <span className={v6Styles.placementLabel} aria-hidden>
+          {bottomMode ? 'B' : 'A'}
+        </span>
+      </button>
       <div className={styles.avatarWrap}>
         <button
           type="button"
