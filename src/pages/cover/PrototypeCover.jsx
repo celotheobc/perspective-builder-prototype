@@ -1,51 +1,79 @@
+import { useState } from 'react';
 import styles from './PrototypeCover.module.css';
 
 const VERSIONS = [
   {
-    id: 'v1',
-    title: 'Stacked Layout',
+    id: 'v7',
+    title: 'Cycle resolution consequences preview',
     description:
-      'Original layout that preceeded the 555 workshop. Start from an empty Perspective and build progressively from a seed object. v1 uses fixed, stacked config surfaces.',
-    tag: 'version 1',
-  },
-  {
-    id: 'v2',
-    title: 'IDE-style asset shell',
-    description:
-      'v2 introduces a selection-driven inspector. The collapsible right panel updates based on whatever is active on the canvas (Perspective, Object, Relationship, etc).',
-    tag: 'version 2',
-  },
-  {
-    id: 'v3',
-    title: 'Create from Context Model selection',
-    description:
-      'As v2, but with a new two-stage flow: select assets from the wider Context Model, then refine the resulting Perspective.',
-    tag: 'version 3',
-  },
-  {
-    id: 'v4',
-    title: 'Create Perspective from Process',
-    description:
-      'As v3, plus a Process asset page where you can create a Perspective from the entire process or a selected subset of its objects and events.',
-    tag: 'version 4',
-  },
-  {
-    id: 'v5',
-    title: 'Panel rebalance + process start',
-    description:
-      'As v4, with included objects/events in the right inspector, diagnostics in the bottom panel, consequence-aware cycle resolution, and start-from-process on the empty perspective screen.',
-    tag: 'version 5',
+      'Builds on v6. Refines cycle resolution into an investigative flow: choose a possible resolution in the right panel, preview consequences in the bottom panel, then commit when confident.',
+    tag: 'v7',
   },
   {
     id: 'v6',
     title: 'Inventory placement experiment',
     description:
       'Same as v5, with renamed inspector tabs (Overview / Inspect) and a prototype toggle to compare side-panel vs bottom-panel inventory placement.',
-    tag: 'version 6',
+    tag: 'v6',
+  },
+  {
+    id: 'v5',
+    title: 'Panel rebalance + process start',
+    description:
+      'As v4, with included objects/events in the right inspector, diagnostics in the bottom panel, consequence-aware cycle resolution, and start-from-process on the empty perspective screen.',
+    tag: 'v5',
+  },
+  {
+    id: 'v4',
+    title: 'Create Perspective from Process',
+    description:
+      'As v3, plus a Process asset page where you can create a Perspective from the entire process or a selected subset of its objects and events.',
+    tag: 'v4',
+  },
+  {
+    id: 'v3',
+    title: 'Create from Context Model selection',
+    description:
+      'As v2, but with a new two-stage flow: select assets from the wider Context Model, then refine the resulting Perspective.',
+    tag: 'v3',
+  },
+  {
+    id: 'v2',
+    title: 'IDE-style asset shell',
+    description:
+      'v2 introduces a selection-driven inspector. The collapsible right panel updates based on whatever is active on the canvas (Perspective, Object, Relationship, etc).',
+    tag: 'v2',
+  },
+  {
+    id: 'v1',
+    title: 'Stacked Layout',
+    description:
+      'Original layout that preceeded the 555 workshop. Start from an empty Perspective and build progressively from a seed object. v1 uses fixed, stacked config surfaces.',
+    tag: 'v1',
   },
 ];
 
+const DEFAULT_EXPANDED = new Set([VERSIONS[0].id]);
+
 export default function PrototypeCover({ onSelectVersion }) {
+  const [expanded, setExpanded] = useState(() => new Set(DEFAULT_EXPANDED));
+
+  const toggleExpanded = (id) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleCardKeyDown = (e, id) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleExpanded(id);
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.inner}>
@@ -56,22 +84,43 @@ export default function PrototypeCover({ onSelectVersion }) {
           </p>
         </header>
 
-        <div className={styles.grid}>
-          {VERSIONS.map((v) => (
-            <button
-              key={v.id}
-              type="button"
-              className={styles.card}
-              onClick={() => onSelectVersion(v.id)}
-            >
-              <span className={styles.cardTag}>{v.tag}</span>
-              <h2 className={styles.cardTitle}>{v.title}</h2>
-              <p className={styles.cardDesc}>{v.description}</p>
-              <span className={styles.cardCta}>Open</span>
-            </button>
-          ))}
-        </div>
+        <div className={styles.list} role="list">
+          {VERSIONS.map((v) => {
+            const isExpanded = expanded.has(v.id);
+            return (
+              <article
+                key={v.id}
+                className={`${styles.item}${isExpanded ? ` ${styles.itemExpanded}` : ''}`}
+                role="button"
+                tabIndex={0}
+                aria-expanded={isExpanded}
+                onClick={() => toggleExpanded(v.id)}
+                onKeyDown={(e) => handleCardKeyDown(e, v.id)}
+              >
+                <div className={styles.headerRow}>
+                  <div className={styles.rowMain}>
+                    <span className={styles.versionChip}>{v.tag}</span>
+                    <h2 className={styles.versionTitle}>{v.title}</h2>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.openBtn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectVersion(v.id);
+                    }}
+                  >
+                    Open
+                  </button>
+                </div>
 
+                {isExpanded && (
+                  <p className={styles.description}>{v.description}</p>
+                )}
+              </article>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

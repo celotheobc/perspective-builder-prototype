@@ -1,0 +1,258 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: previewIn 0.24s ease;
+}
+
+@keyframes previewIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.blockLabel {
+  margin: 0 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--celonis-text-muted);
+}
+
+.summarySection {
+  padding: 0;
+  background: #f8fafc;
+  border: 1px solid #eef1f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) minmax(0, 1.1fr);
+  align-items: stretch;
+}
+
+.removalColumn,
+.impactColumn {
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.removalColumn {
+  border-right: 1px solid #eef1f5;
+}
+
+.impactColumn:not(:last-child) {
+  border-right: 1px solid #eef1f5;
+}
+
+.relationshipTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--celonis-text);
+}
+
+.impactColumn .blockLabel,
+.removalColumn .blockLabel {
+  margin-bottom: 6px;
+}
+
+.consequenceList,
+.dataImpactList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.consequenceItem,
+.dataImpactItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--celonis-text);
+}
+
+.statusDot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+}
+
+.statusGood {
+  background: #16a34a;
+}
+
+.statusWarn {
+  background: #d97706;
+}
+
+.statusBad {
+  background: #dc2626;
+}
+
+.showMore {
+  margin-top: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--celonis-primary);
+  cursor: pointer;
+}
+
+.showMore:hover {
+  text-decoration: underline;
+}
+
+.dataImpactText {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--celonis-text);
+}
+
+.dataImpactDetail {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--celonis-text-muted);
+}
+
+.pqlSection {
+  min-width: 0;
+}
+
+.pqlEditor {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  color: #1e293b;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.resultSection {
+  min-width: 0;
+}
+
+.resultTableWrap {
+  overflow-x: auto;
+  border: 1px solid #eef1f5;
+  border-radius: 8px;
+}
+
+.resultTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.resultTable th,
+.resultTable td {
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 1px solid #eef1f5;
+}
+
+.resultTable th {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--celonis-text-muted);
+  background: #f8fafc;
+}
+
+.resultTable tr:last-child td {
+  border-bottom: none;
+}
+
+.resultErrorCell {
+  padding: 10px 12px !important;
+  font-size: 12px;
+  font-weight: 600;
+  color: #b91c1c;
+  background: #fff1f2;
+  border-bottom: none !important;
+}
+
+.resultErrorIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: #dc2626;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.cellWarn {
+  color: #b45309;
+}
+
+.empty {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--celonis-text-muted);
+}
+
+@media (max-width: 860px) {
+  .summaryGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .removalColumn {
+    grid-column: 1 / -1;
+    border-right: none;
+    border-bottom: 1px solid #eef1f5;
+    padding-bottom: 8px;
+  }
+
+  .impactColumn:first-of-type {
+    border-right: 1px solid #eef1f5;
+  }
+}
+
+@media (max-width: 560px) {
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .impactColumn:first-of-type {
+    border-right: none;
+    border-bottom: 1px solid #eef1f5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+}

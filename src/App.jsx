@@ -6,6 +6,7 @@ import PerspectiveBuilderV3 from './pages/v3/PerspectiveBuilderV3';
 import PerspectiveBuilderV4 from './pages/v4/PerspectiveBuilderV4';
 import PerspectiveBuilderV5 from './pages/v5/PerspectiveBuilderV5';
 import PerspectiveBuilderV6 from './pages/v6/PerspectiveBuilderV6';
+import PerspectiveBuilderV7 from './pages/v7/PerspectiveBuilderV7';
 import PerspectiveBuilderV1_5 from './pages/v1_5/PerspectiveBuilderV1_5';
 
 function resolveVersion(saved) {
@@ -16,6 +17,7 @@ function resolveVersion(saved) {
   if (saved === 'v4') return 'v4';
   if (saved === 'v5') return 'v5';
   if (saved === 'v6') return 'v6';
+  if (saved === 'v7') return 'v7';
   if (saved === 'v1.5' || saved === 'v1_5') return 'v1.5';
   return 'cover';
 }
@@ -52,6 +54,9 @@ export default function App() {
     }
     if (version === 'v6') {
       return <PerspectiveBuilderV6 onVersionChange={handleVersionChange} />;
+    }
+    if (version === 'v7') {
+      return <PerspectiveBuilderV7 onVersionChange={handleVersionChange} />;
     }
     return <PerspectiveBuilderV3 onVersionChange={handleVersionChange} />;
   }, [version]);

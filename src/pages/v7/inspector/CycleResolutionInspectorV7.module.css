@@ -1,0 +1,109 @@
+.loopList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loopCard {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    border-style 0.15s ease;
+}
+
+.loopCardHover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.loopCardPreviewing {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  box-shadow: none;
+}
+
+.loopCard:has(.loopRemoveSecondary:hover),
+.loopCard:has(.loopRemoveSecondary:focus-visible) {
+  border-style: dashed;
+  border-color: #fca5a5;
+  background: #fff1f2;
+}
+
+.loopName {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--celonis-text);
+  word-break: break-word;
+}
+
+.loopHint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--celonis-text-muted);
+}
+
+.loopActions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.loopPreviewPrimary {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--celonis-primary);
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.loopPreviewPrimary:hover,
+.loopPreviewPrimary:focus-visible {
+  background: var(--celonis-primary-hover);
+}
+
+.loopCardPreviewing .loopPreviewPrimary {
+  background: var(--celonis-primary-hover);
+}
+
+.loopRemoveSecondary {
+  width: 100%;
+  padding: 7px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  color: #b91c1c;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.loopRemoveSecondary:hover,
+.loopRemoveSecondary:focus-visible {
+  background: #fff1f2;
+  border-color: #f87171;
+}
