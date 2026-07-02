@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './ImpactPreviewPanel.module.css';
 
 const MAX_VISIBLE_CONSEQUENCES = 3;
@@ -59,6 +59,108 @@ function DataImpactList({ items }) {
   );
 }
 
+function ResultTable({ results, ran }) {
+  if (results.error) {
+    return (
+      <div className={styles.resultTableWrap}>
+        <table className={styles.resultTable}>
+          <tbody>
+            <tr>
+              <td className={styles.resultErrorCell} colSpan={1} role="alert">
+                <span className={styles.resultErrorIcon} aria-hidden>!</span>
+                {results.error}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${styles.resultTableWrap} ${ran ? styles.resultTableWrapUpdated : ''}`}>
+      <table className={styles.resultTable}>
+        <thead>
+          <tr>
+            {results.columns.map((col) => (
+              <th key={col} scope="col">
+                {col}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {results.rows.map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              {row.map((cell, cellIndex) => (
+                <td
+                  key={`${rowIndex}-${cellIndex}`}
+                  className={cell === '—' ? styles.cellWarn : undefined}
+                >
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function PqlEditor({ pql, pqlValidated, results, resultsOnRun }) {
+  const [pqlText, setPqlText] = useState(pql);
+  const [validated, setValidated] = useState(false);
+  const [displayResults, setDisplayResults] = useState(results);
+  const [hasRun, setHasRun] = useState(false);
+
+  useEffect(() => {
+    setPqlText(pql);
+    setValidated(false);
+    setDisplayResults(results);
+    setHasRun(false);
+  }, [pql, results]);
+
+  const applyValidation = () => {
+    if (validated) return;
+    setPqlText(pqlValidated ?? pql);
+    setValidated(true);
+  };
+
+  const handleRun = () => {
+    if (!validated) applyValidation();
+    setDisplayResults(resultsOnRun ?? results);
+    setHasRun(true);
+  };
+
+  return (
+    <>
+      <div
+        className={`${styles.pqlEditorWrap} ${validated ? styles.pqlEditorWrapValidated : ''}`}
+      >
+        <textarea
+          className={styles.pqlTextarea}
+          value={pqlText}
+          onChange={(e) => setPqlText(e.target.value)}
+          onFocus={applyValidation}
+          onClick={applyValidation}
+          spellCheck={false}
+          aria-label="PQL preview editor"
+          rows={5}
+        />
+        <button
+          type="button"
+          className={styles.pqlRunBtn}
+          onClick={handleRun}
+        >
+          Run
+        </button>
+      </div>
+      <ResultTable results={displayResults} ran={hasRun} />
+    </>
+  );
+}
+
 export default function ImpactPreviewPanel({ preview }) {
   if (!preview) {
     return (
@@ -68,7 +170,15 @@ export default function ImpactPreviewPanel({ preview }) {
     );
   }
 
-  const { relationshipLabel, businessConsequences, dataImpact, pql, results } = preview;
+  const {
+    relationshipLabel,
+    businessConsequences,
+    dataImpact,
+    pql,
+    pqlValidated,
+    results,
+    resultsOnRun,
+  } = preview;
 
   return (
     <div className={styles.panel} key={relationshipLabel}>
@@ -101,52 +211,12 @@ export default function ImpactPreviewPanel({ preview }) {
         <h4 id="pql-preview-heading" className={styles.blockLabel}>
           PQL preview
         </h4>
-        <pre className={styles.pqlEditor}>{pql}</pre>
-      </section>
-
-      <section className={styles.resultSection} aria-label="Query result">
-        {results.error ? (
-          <div className={styles.resultTableWrap}>
-            <table className={styles.resultTable}>
-              <tbody>
-                <tr>
-                  <td className={styles.resultErrorCell} colSpan={1} role="alert">
-                    <span className={styles.resultErrorIcon} aria-hidden>!</span>
-                    {results.error}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className={styles.resultTableWrap}>
-            <table className={styles.resultTable}>
-              <thead>
-                <tr>
-                  {results.columns.map((col) => (
-                    <th key={col} scope="col">
-                      {col}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {results.rows.map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    {row.map((cell, cellIndex) => (
-                      <td
-                        key={`${rowIndex}-${cellIndex}`}
-                        className={cell === '—' ? styles.cellWarn : undefined}
-                      >
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <PqlEditor
+          pql={pql}
+          pqlValidated={pqlValidated}
+          results={results}
+          resultsOnRun={resultsOnRun}
+        />
       </section>
     </div>
   );

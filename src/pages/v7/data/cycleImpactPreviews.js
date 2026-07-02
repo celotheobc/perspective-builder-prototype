@@ -15,12 +15,27 @@ const DEFAULT_PREVIEW = {
     SalesOrder.ID,
     DeliveryItem.ID
 FROM Perspective`,
+  pqlValidated: `SELECT
+    Customer.ID,
+    SalesOrder.ID,
+    DeliveryItem.ID
+FROM Perspective
+WHERE Customer.Status = 'Active'`,
   results: {
     columns: ['Customer', 'Sales Order', 'Delivery Item'],
     rows: [
       ['C001', 'SO100', 'DI221'],
       ['C001', 'SO101', 'DI228'],
       ['C002', 'SO112', 'DI240'],
+    ],
+  },
+  resultsOnRun: {
+    columns: ['Customer', 'Sales Order', 'Delivery Item'],
+    rows: [
+      ['C001', 'SO100', 'DI221'],
+      ['C001', 'SO101', 'DI228'],
+      ['C002', 'SO112', 'DI240'],
+      ['C003', 'SO120', 'DI255'],
     ],
   },
 };
@@ -44,12 +59,27 @@ export const CYCLE_IMPACT_PREVIEWS = {
     SalesOrder.ID,
     DeliveryItem.ID
 FROM Perspective`,
+    pqlValidated: `SELECT
+    Customer.ID,
+    SalesOrder.ID,
+    DeliveryItem.ID
+FROM Perspective
+WHERE Customer.Region = 'EMEA'`,
     results: {
       columns: ['Customer', 'Sales Order', 'Delivery Item'],
       rows: [
         ['C001', 'SO100', 'DI221'],
         ['C001', 'SO101', 'DI228'],
         ['C002', 'SO112', 'DI240'],
+      ],
+    },
+    resultsOnRun: {
+      columns: ['Customer', 'Sales Order', 'Delivery Item'],
+      rows: [
+        ['C001', 'SO100', 'DI221'],
+        ['C001', 'SO101', 'DI228'],
+        ['C002', 'SO112', 'DI240'],
+        ['C004', 'SO130', 'DI261'],
       ],
     },
   },
@@ -70,12 +100,25 @@ FROM Perspective`,
     Customer.ID,
     DeliveryItem.ID
 FROM Perspective`,
+    pqlValidated: `SELECT
+    Customer.ID,
+    DeliveryItem.ID
+FROM Perspective
+WHERE DeliveryItem.Status <> 'Cancelled'`,
     results: {
       columns: ['Customer', 'Delivery Item'],
       rows: [
         ['C001', 'DI221'],
         ['C002', 'DI240'],
         ['C003', '—'],
+      ],
+    },
+    resultsOnRun: {
+      columns: ['Customer', 'Delivery Item'],
+      rows: [
+        ['C001', 'DI221'],
+        ['C002', 'DI240'],
+        ['C003', 'DI248'],
       ],
     },
   },
@@ -97,8 +140,22 @@ FROM Perspective`,
     SalesOrder.ID,
     DeliveryItem.ID
 FROM Perspective`,
+    pqlValidated: `SELECT
+    Customer.ID,
+    SalesOrder.ID
+FROM Perspective
+WHERE SalesOrder.Status = 'Open'`,
     results: {
       error: 'Query failed — Invoice no longer reachable from Customer',
+    },
+    resultsOnRun: {
+      columns: ['Customer', 'Sales Order'],
+      rows: [
+        ['C001', 'SO100'],
+        ['C001', 'SO101'],
+        ['C002', 'SO112'],
+        ['C003', 'SO118'],
+      ],
     },
   },
   'r-delivery-di': {
@@ -118,12 +175,26 @@ FROM Perspective`,
     Customer.ID,
     SalesOrder.ID
 FROM Perspective`,
+    pqlValidated: `SELECT
+    Customer.ID,
+    SalesOrder.ID
+FROM Perspective
+WHERE SalesOrder.CreatedDate >= '2024-01-01'`,
     results: {
       columns: ['Customer', 'Sales Order'],
       rows: [
         ['C001', 'SO100'],
         ['C001', 'SO101'],
         ['C002', 'SO112'],
+      ],
+    },
+    resultsOnRun: {
+      columns: ['Customer', 'Sales Order'],
+      rows: [
+        ['C001', 'SO100'],
+        ['C001', 'SO101'],
+        ['C002', 'SO112'],
+        ['C002', 'SO115'],
       ],
     },
   },
