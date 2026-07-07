@@ -20,6 +20,10 @@ import { useClearEntitySelectionOnCycle } from '../../../hooks/useClearEntitySel
 import { INVENTORY_PLACEMENT } from '../../v6/inventory/inventoryPlacement';
 import { useInventoryPlacement } from '../../v6/inventory/InventoryPlacementContext';
 import { getCycleImpactPreview } from '../data/cycleImpactPreviews';
+import {
+  getConnectionConsequencePreview,
+  KEEP_DISCONNECTED_CHOICE,
+} from '../data/connectionConsequencePreviews';
 import layoutStyles from '../../v1_5/PerspectiveBuilderV1_5.module.css';
 
 export default function PerspectiveRefineView({
@@ -40,6 +44,7 @@ export default function PerspectiveRefineView({
   const [bottomCollapsed, setBottomCollapsed] = useState(false);
   const [rightPanelTab, setRightPanelTab] = useState('overview');
   const [previewRelationshipId, setPreviewRelationshipId] = useState(null);
+  const [previewConnectionChoiceId, setPreviewConnectionChoiceId] = useState(null);
   const [resolvedDecisions, setResolvedDecisions] = useState([]);
   const { placement: inventoryPlacement } = useInventoryPlacement();
 
@@ -169,13 +174,59 @@ export default function PerspectiveRefineView({
 
   const handlePreviewImpact = useCallback(
     (relId) => {
+      setPreviewConnectionChoiceId(null);
+      progressive.clearConnectionPathPreview();
       setPreviewRelationshipId(relId);
       setHighlightedRelationshipId(relId);
       setBottomTab('consequences');
       setBottomCollapsed(false);
     },
-    [setBottomTab, setHighlightedRelationshipId],
+    [setBottomTab, setHighlightedRelationshipId, progressive],
   );
+
+  const handlePreviewConnectionConsequences = useCallback(
+    (choiceId) => {
+      setPreviewRelationshipId(null);
+      setPreviewConnectionChoiceId(choiceId);
+      if (choiceId === KEEP_DISCONNECTED_CHOICE) {
+        progressive.clearConnectionPathPreview();
+      } else {
+        progressive.previewConnectionPath(choiceId);
+      }
+      setBottomTab('consequences');
+      setBottomCollapsed(false);
+    },
+    [setBottomTab, progressive],
+  );
+
+  const handleHoverConnectionChoice = useCallback(
+    (choiceId) => {
+      const targetId = choiceId ?? previewConnectionChoiceId;
+      if (!targetId) {
+        progressive.clearConnectionPathPreview();
+        return;
+      }
+      if (targetId === KEEP_DISCONNECTED_CHOICE) {
+        progressive.clearConnectionPathPreview();
+        return;
+      }
+      progressive.previewConnectionPath(targetId);
+    },
+    [progressive, previewConnectionChoiceId],
+  );
+
+  const handleAddConnection = useCallback(
+    (pathId) => {
+      setPreviewConnectionChoiceId(null);
+      progressive.insertConnectionPath(pathId);
+    },
+    [progressive],
+  );
+
+  const handleKeepDisconnected = useCallback(() => {
+    setPreviewConnectionChoiceId(null);
+    progressive.keepObjectsUnconnected();
+  }, [progressive]);
 
   const handleRemoveRelationship = useCallback(
     (relId) => {
@@ -204,11 +255,26 @@ export default function PerspectiveRefineView({
     [setBottomTab, setHighlightedRelationshipId],
   );
 
-  const impactPreview = useMemo(() => {
-    if (!previewRelationshipId) return null;
-    const row = relationshipTable.rows.find((r) => r.id === previewRelationshipId);
-    return getCycleImpactPreview(previewRelationshipId, row?.name);
-  }, [previewRelationshipId, relationshipTable.rows]);
+  const consequencesPreview = useMemo(() => {
+    if (previewRelationshipId) {
+      const row = relationshipTable.rows.find((r) => r.id === previewRelationshipId);
+      return getCycleImpactPreview(previewRelationshipId, row?.name);
+    }
+    if (previewConnectionChoiceId && progressive.connectionPrompt) {
+      return getConnectionConsequencePreview(
+        previewConnectionChoiceId,
+        progressive.connectionPrompt,
+        progressive.includedObjects,
+      );
+    }
+    return null;
+  }, [
+    previewRelationshipId,
+    previewConnectionChoiceId,
+    progressive.connectionPrompt,
+    progressive.includedObjects,
+    relationshipTable.rows,
+  ]);
 
   const cycleActive = progressive.cycleActive && !progressive.isCycleResolved;
   const effectiveGraphHighlight =
@@ -216,6 +282,29 @@ export default function PerspectiveRefineView({
       ? (highlightedRelationshipId ?? previewRelationshipId)
       : highlightedRelationshipId;
   const hadConnectionPrompt = useRef(false);
+
+  useEffect(() => {
+    if (!progressive.connectionPrompt) {
+      setPreviewConnectionChoiceId(null);
+      hadConnectionPrompt.current = false;
+      return;
+    }
+    if (!hadConnectionPrompt.current) {
+      selectCanvasWithClearFocus();
+      setRightCollapsed(false);
+      setBottomCollapsed(false);
+    }
+    hadConnectionPrompt.current = true;
+  }, [progressive.connectionPrompt, selectCanvasWithClearFocus]);
+
+  useEffect(() => {
+    if (!previewConnectionChoiceId || !progressive.connectionPrompt) return;
+    if (previewConnectionChoiceId === KEEP_DISCONNECTED_CHOICE) {
+      progressive.clearConnectionPathPreview();
+    } else {
+      progressive.previewConnectionPath(previewConnectionChoiceId);
+    }
+  }, [previewConnectionChoiceId, progressive.connectionPrompt, progressive]);
 
   useClearEntitySelectionOnCycle({
     cycleActive,
@@ -226,14 +315,6 @@ export default function PerspectiveRefineView({
       setBottomCollapsed(false);
     },
   });
-
-  useEffect(() => {
-    if (progressive.connectionPrompt && !hadConnectionPrompt.current) {
-      selectCanvasWithClearFocus();
-      setRightCollapsed(false);
-    }
-    hadConnectionPrompt.current = Boolean(progressive.connectionPrompt);
-  }, [progressive.connectionPrompt, selectCanvasWithClearFocus]);
 
   useEffect(() => {
     if (!cycleActive) return;
@@ -307,7 +388,12 @@ export default function PerspectiveRefineView({
               onResizeWidth={adjustRightWidth}
               cycleResolution={cycleResolution}
               previewRelationshipId={previewRelationshipId}
+              previewConnectionChoiceId={previewConnectionChoiceId}
               onPreviewImpact={handlePreviewImpact}
+              onPreviewConnectionConsequences={handlePreviewConnectionConsequences}
+              onHoverConnectionChoice={handleHoverConnectionChoice}
+              onAddConnection={handleAddConnection}
+              onKeepDisconnected={handleKeepDisconnected}
               onRemoveRelationship={handleRemoveRelationship}
               onHighlightRelationship={setHighlightedRelationshipId}
               onSelectRelationship={handleSelectRelationship}
@@ -334,7 +420,7 @@ export default function PerspectiveRefineView({
               eventRows={eventRows}
               issues={issues}
               resolvedDecisions={resolvedDecisions}
-              impactPreview={impactPreview}
+              consequencesPreview={consequencesPreview}
               onReviewResolvedDecision={handleReviewResolvedDecision}
               selection={selection}
               onSelectRelationship={handleSelectRelationship}

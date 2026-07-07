@@ -475,8 +475,16 @@ export default function PerspectiveGraph({
   );
 
   const onEdgeMouseLeave = useCallback(
-    (_event, edge) => {
-      if (!edge.data?.relId || !graphSelection?.onHoverEdge) return;
+    (event, edge) => {
+      const relId = edge.data?.relId;
+      if (!relId || !graphSelection?.onHoverEdge) return;
+      const related = event?.relatedTarget;
+      if (
+        related instanceof Element &&
+        related.closest(`[data-scissors-for="${relId}"]`)
+      ) {
+        return;
+      }
       graphSelection.onHoverEdge(null);
     },
     [graphSelection],

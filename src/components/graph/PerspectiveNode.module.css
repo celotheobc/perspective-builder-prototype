@@ -67,7 +67,7 @@
   box-shadow:
     0 1px 2px rgba(26, 31, 54, 0.05),
     0 4px 16px rgba(26, 31, 54, 0.08);
-  pointer-events: auto;
+  pointer-events: none;
   z-index: 0;
 }
 
@@ -236,14 +236,13 @@
 }
 
 .hub.included {
-  transform: scale(1.05);
   z-index: 12;
 }
 
 .included:hover:not(.dimmed) .puck,
 .refocusable:hover:not(.dimmed) .puck,
 .refocusable:focus-visible:not(.dimmed) .puck {
-  transform: scale(1.1);
+  transform: none;
 }
 
 .selectable.included:hover:not(.dimmed) .puck,

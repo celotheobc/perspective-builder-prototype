@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 export const SELECTION_TYPES = {
   CANVAS: 'canvas',
@@ -49,8 +49,21 @@ export function usePerspectiveSelection() {
     setBottomTab('issues');
   }, []);
 
+  const hoverClearRef = useRef(null);
+
   const hoverRelationship = useCallback((id) => {
-    setHighlightedRelationshipId(id);
+    if (hoverClearRef.current) {
+      clearTimeout(hoverClearRef.current);
+      hoverClearRef.current = null;
+    }
+    if (id != null) {
+      setHighlightedRelationshipId(id);
+      return;
+    }
+    hoverClearRef.current = setTimeout(() => {
+      setHighlightedRelationshipId(null);
+      hoverClearRef.current = null;
+    }, 48);
   }, []);
 
   const graphSelection = {

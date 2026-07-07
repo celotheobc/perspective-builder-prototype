@@ -221,6 +221,18 @@ export const relationshipTableMeta = {
   },
 };
 
+/** Upstream / downstream dependencies shown on the perspective Overview tab. */
+export const perspectiveOverviewDependencies = {
+  partOf: [
+    { id: 'otc-process', label: 'Order-to-Cash Process', iconColor: '#507D8E' },
+    { id: 'order-log', label: 'Order log Event log', iconColor: '#218C5E' },
+  ],
+  usedBy: [
+    { id: 'on-time-check', label: 'On-time check Function', iconColor: '#DB6E4C' },
+    { id: 'cycle-time', label: 'Cycle time Metric', iconColor: '#B13E83' },
+  ],
+};
+
 export const agentContextMarkdown = `## Order to Cash Perspective
 
 This perspective scopes the **Order to Cash** process for agent reasoning.

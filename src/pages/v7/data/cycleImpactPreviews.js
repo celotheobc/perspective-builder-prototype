@@ -200,12 +200,46 @@ WHERE SalesOrder.CreatedDate >= '2024-01-01'`,
   },
 };
 
+const CYCLE_COMPARISON_NOTES = {
+  'r-customer-di': [
+    { status: 'good', text: 'Lowest apparent impact among the four removals' },
+    { status: 'good', text: 'Fewer missing joins than Sales Order → Delivery' },
+    { status: 'warn', text: 'Still removes a direct customer shortcut' },
+  ],
+  'r-so-delivery': [
+    { status: 'warn', text: 'More joins affected than Customer → Delivery Item' },
+    { status: 'good', text: 'Keeps a customer entry point unlike Customer → Sales Order' },
+    { status: 'warn', text: 'Filter propagation becomes partial' },
+  ],
+  'r-customer-so': [
+    { status: 'bad', text: 'Highest impact — breaks customer filtering' },
+    { status: 'bad', text: 'Worse reachability than any other option' },
+    { status: 'warn', text: 'Only viable if customer-led analysis is not needed' },
+  ],
+  'r-delivery-di': [
+    { status: 'good', text: 'Similar reachability to the recommended option' },
+    { status: 'warn', text: 'Slightly more joins affected than Customer → Delivery Item' },
+    { status: 'good', text: 'Avoids breaking customer filter propagation' },
+  ],
+};
+
+const DEFAULT_COMPARISON_NOTES = [
+  { status: 'warn', text: 'Compare reachability and join loss with other removals' },
+  { status: 'warn', text: 'Filter propagation may differ across options' },
+];
+
 export function getCycleImpactPreview(relId, rowName) {
   const preview = CYCLE_IMPACT_PREVIEWS[relId];
-  if (preview) return preview;
+  if (preview) {
+    return {
+      ...preview,
+      comparisonNotes: CYCLE_COMPARISON_NOTES[relId] ?? DEFAULT_COMPARISON_NOTES,
+    };
+  }
 
   return {
     ...DEFAULT_PREVIEW,
     relationshipLabel: rowName ?? DEFAULT_PREVIEW.relationshipLabel,
+    comparisonNotes: DEFAULT_COMPARISON_NOTES,
   };
 }

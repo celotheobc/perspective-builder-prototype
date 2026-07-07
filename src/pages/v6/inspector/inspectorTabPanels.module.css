@@ -34,3 +34,33 @@
 .summaryList li + li {
   border-top: 1px solid #eef1f5;
 }
+
+.dependencyDivider {
+  margin: 24px 0 0;
+  padding: 0;
+  border: none;
+  border-top: 1px solid #e8edf3;
+}
+
+.dependencyItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e8edf3;
+  font-size: 13px;
+  line-height: 1.35;
+  color: #1e293b;
+}
+
+.dependencyItem:last-child {
+  border-bottom: none;
+}
+
+.dependencyIcon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}

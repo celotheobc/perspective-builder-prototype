@@ -25,6 +25,11 @@
   color: var(--celonis-text-muted);
 }
 
+.summaryBlock,
+.pqlSection {
+  min-width: 0;
+}
+
 .summarySection {
   padding: 0;
   background: #f8fafc;
@@ -35,39 +40,31 @@
 
 .summaryGrid {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) minmax(0, 1.1fr);
   align-items: stretch;
 }
 
-.removalColumn,
+.summaryGridTwo {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summaryGridThree {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .impactColumn {
   min-width: 0;
   padding: 10px 12px;
-}
-
-.removalColumn {
-  border-right: 1px solid #eef1f5;
 }
 
 .impactColumn:not(:last-child) {
   border-right: 1px solid #eef1f5;
 }
 
-.relationshipTitle {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.35;
-  color: var(--celonis-text);
-}
-
-.impactColumn .blockLabel,
-.removalColumn .blockLabel {
+.impactColumn .blockLabel {
   margin-bottom: 6px;
 }
 
-.consequenceList,
-.dataImpactList {
+.comparisonList {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -132,6 +129,16 @@
   font-size: 12px;
   font-weight: 400;
   color: var(--celonis-text-muted);
+}
+
+.consequenceList,
+.dataImpactList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .pqlSection {
@@ -277,30 +284,35 @@
 }
 
 @media (max-width: 860px) {
-  .summaryGrid {
+  .summaryGridThree {
     grid-template-columns: 1fr 1fr;
   }
 
-  .removalColumn {
+  .summaryGridThree .impactColumn:last-child {
     grid-column: 1 / -1;
     border-right: none;
-    border-bottom: 1px solid #eef1f5;
-    padding-bottom: 8px;
+    border-top: 1px solid #eef1f5;
   }
 
-  .impactColumn:first-of-type {
+  .summaryGridTwo .impactColumn:first-child {
     border-right: 1px solid #eef1f5;
   }
 }
 
 @media (max-width: 560px) {
-  .summaryGrid {
+  .summaryGridTwo,
+  .summaryGridThree {
     grid-template-columns: 1fr;
   }
 
-  .impactColumn:first-of-type {
+  .impactColumn:not(:last-child) {
     border-right: none;
     border-bottom: 1px solid #eef1f5;
+  }
+
+  .summaryGridThree .impactColumn:last-child {
+    grid-column: auto;
+    border-top: none;
   }
 }
 

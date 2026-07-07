@@ -50,14 +50,14 @@ function DataTable({ columns, rows, selectedId, highlightedId, onSelectRow, onHo
 }
 
 const TABS_SIDE = [
-  { id: 'relationships', label: 'Included Relationships', countKey: 'relationships' },
+  { id: 'relationships', label: 'Includes Relationships', countKey: 'relationships' },
   { id: 'issues', label: 'Issues / Problems', countKey: 'issues' },
 ];
 
 const TABS_BOTTOM = [
-  { id: 'objects', label: 'Included Objects', countKey: 'objects' },
-  { id: 'eventSources', label: 'Included Event Sources', countKey: 'eventSources' },
-  { id: 'relationships', label: 'Included Relationships', countKey: 'relationships' },
+  { id: 'objects', label: 'Includes Object Types', countKey: 'objects' },
+  { id: 'eventSources', label: 'Includes Event Sources', countKey: 'eventSources' },
+  { id: 'relationships', label: 'Includes Relationships', countKey: 'relationships' },
   { id: 'issues', label: 'Issues / Problems', countKey: 'issues' },
 ];
 

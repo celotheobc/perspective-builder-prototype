@@ -106,8 +106,7 @@ function RouteEdgeComponent({
       (previewBridgeCreatesCycle
         ? styles.previewBridgeCycle
         : styles.previewBridgeSafe),
-    hovered && styles.previewRemove,
-    highlightFromTableCycle && styles.previewRemove,
+    hovered && !highlightFromTable && styles.previewRemove,
   ]
     .filter(Boolean)
     .join(' ');
@@ -116,7 +115,13 @@ function RouteEdgeComponent({
   const labelTransform = `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`;
 
   const handleScissorsEnter = useCallback(() => setHovered(true), []);
-  const handleScissorsLeave = useCallback(() => setHovered(false), []);
+  const handleScissorsLeave = useCallback((event) => {
+    const related = event?.relatedTarget;
+    if (related instanceof Element && related.closest(`[data-scissors-for="${relId}"]`)) {
+      return;
+    }
+    setHovered(false);
+  }, [relId]);
 
   return (
     <>
@@ -126,19 +131,22 @@ function RouteEdgeComponent({
         className={edgeClass}
         style={edgePathStyle(visual)}
         markerEnd={edgeMarker(visual.markerColor)}
-        interactionWidth={14}
+        interactionWidth={20}
       />
       {showScissors && !pruned && (
         <EdgeLabelRenderer>
           <div className={styles.labelWrap} style={{ transform: labelTransform }}>
-            <div className={styles.scissorsWrap}>
+            <div
+              className={styles.scissorsWrap}
+              data-scissors-for={relId}
+              onMouseEnter={handleScissorsEnter}
+              onMouseLeave={handleScissorsLeave}
+            >
               <button
                 type="button"
                 className={`${styles.edgeScissors} ${hovered ? styles.edgeScissorsActive : ''}`}
                 aria-label={preview?.title}
                 onClick={() => onPrune?.(relId)}
-                onMouseEnter={handleScissorsEnter}
-                onMouseLeave={handleScissorsLeave}
                 onFocus={handleScissorsEnter}
                 onBlur={handleScissorsLeave}
               >

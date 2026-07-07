@@ -1,7 +1,9 @@
 import ResizeHandle from '../../v1_5/layout/ResizeHandle';
 import CycleResolutionInspectorV7 from './CycleResolutionInspectorV7';
+import ConnectionDecisionInspectorV7 from './ConnectionDecisionInspectorV7';
 import ResolutionModeHeader from './ResolutionModeHeader';
-import DisconnectedConnectionPanel from '../../../components/configuration/DisconnectedConnectionPanel';
+import ConnectionDecisionHeader from './ConnectionDecisionHeader';
+import { objectName } from '../../../components/configuration/connectionPath/PathRouteLabel';
 import { SELECTION_TYPES } from '../../v5/selection/usePerspectiveSelection';
 import InspectTabContent from '../../v6/inspector/InspectTabContent';
 import {
@@ -32,7 +34,12 @@ export default function RightInspector({
   onResizeWidth,
   cycleResolution = null,
   previewRelationshipId = null,
+  previewConnectionChoiceId = null,
   onPreviewImpact,
+  onPreviewConnectionConsequences,
+  onHoverConnectionChoice,
+  onAddConnection,
+  onKeepDisconnected,
   onRemoveRelationship,
   onHighlightRelationship,
   onSelectRelationship,
@@ -47,13 +54,16 @@ export default function RightInspector({
   const inResolutionMode = Boolean(
     cycleResolution?.active && !cycleResolution?.resolved,
   );
-  const inConnectionMode = Boolean(progressive.connectionPrompt);
+  const connectionPrompt = progressive.connectionPrompt;
+  const inConnectionMode = Boolean(connectionPrompt);
   const forceResolutionPanel =
     inResolutionMode && selection.type !== SELECTION_TYPES.CYCLE_EDGE;
   const forceConnectionPanel =
     inConnectionMode && !forceResolutionPanel;
   const showSpecialPanel = forceResolutionPanel || forceConnectionPanel;
-  const resolutionCount = cycleResolution?.rows?.filter((r) => r.isConflicting).length ?? 0;
+  const connectionObjectName = connectionPrompt
+    ? objectName(connectionPrompt.addedId)
+    : '';
 
   return (
     <aside
@@ -71,7 +81,7 @@ export default function RightInspector({
       <div className={styles.panel}>
         {!collapsed && forceResolutionPanel && (
           <header className={styles.panelHeader}>
-            <ResolutionModeHeader resolutionCount={resolutionCount} />
+            <ResolutionModeHeader />
             <button type="button" className={styles.collapseBtn} onClick={onToggle}>
               ▸
             </button>
@@ -79,7 +89,10 @@ export default function RightInspector({
         )}
         {!collapsed && forceConnectionPanel && (
           <header className={styles.panelHeader}>
-            <div className={panelTabStyles.bar} />
+            <ConnectionDecisionHeader
+              objectName={connectionObjectName}
+              pathCount={connectionPrompt.paths.length}
+            />
             <button type="button" className={styles.collapseBtn} onClick={onToggle}>
               ▸
             </button>
@@ -130,14 +143,15 @@ export default function RightInspector({
               </div>
             ) : forceConnectionPanel ? (
               <div className={styles.tabContent}>
-                <DisconnectedConnectionPanel
-                  prompt={progressive.connectionPrompt}
+                <ConnectionDecisionInspectorV7
+                  prompt={connectionPrompt}
                   includedObjects={progressive.includedObjects}
-                  previewPathId={progressive.previewBridgePathId}
-                  onPreviewPath={progressive.previewConnectionPath}
-                  onClearPreview={progressive.clearConnectionPathPreview}
-                  onInsertPath={progressive.insertConnectionPath}
-                  onKeepUnconnected={progressive.keepObjectsUnconnected}
+                  previewChoiceId={previewConnectionChoiceId}
+                  hoverChoiceId={progressive.previewBridgePathId ?? previewConnectionChoiceId}
+                  onHoverChoice={onHoverConnectionChoice}
+                  onPreviewConsequences={onPreviewConnectionConsequences}
+                  onAddConnection={onAddConnection}
+                  onKeepDisconnected={onKeepDisconnected}
                 />
               </div>
             ) : (
@@ -149,6 +163,8 @@ export default function RightInspector({
                     cycleResolution={cycleResolution}
                     onSelectRelationship={onSelectRelationship}
                     onSelectEvent={onSelectEvent}
+                    onPreviewRelationshipConsequences={onPreviewImpact}
+                    previewRelationshipId={previewRelationshipId}
                   />
                 )}
                 {activeTab === 'overview' && (

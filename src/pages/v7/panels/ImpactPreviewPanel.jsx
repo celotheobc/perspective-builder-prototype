@@ -9,6 +9,24 @@ const STATUS_CLASS = {
   bad: styles.statusBad,
 };
 
+function ComparisonList({ items }) {
+  if (!items?.length) return null;
+
+  return (
+    <ul className={styles.comparisonList}>
+      {items.map((item) => (
+        <li key={item.text} className={styles.consequenceItem}>
+          <span
+            className={`${styles.statusDot} ${STATUS_CLASS[item.status] ?? styles.statusWarn}`}
+            aria-hidden
+          />
+          <span>{item.text}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function BusinessConsequences({ items }) {
   const [expanded, setExpanded] = useState(false);
   const hasMore = items.length > MAX_VISIBLE_CONSEQUENCES;
@@ -171,38 +189,56 @@ export default function ImpactPreviewPanel({ preview }) {
   }
 
   const {
+    summaryHeading = 'If you remove',
+    decisionLabel,
     relationshipLabel,
     businessConsequences,
     dataImpact,
+    comparisonNotes,
     pql,
     pqlValidated,
     results,
     resultsOnRun,
   } = preview;
 
+  const title = decisionLabel ?? relationshipLabel;
+  const decisionTitle = `${summaryHeading} ${title}`.replace(/\s+/g, ' ').trim();
+  const hasComparison = comparisonNotes?.length > 0;
+
   return (
-    <div className={styles.panel} key={relationshipLabel}>
-      <section className={styles.summarySection} aria-label="Resolution summary">
-        <div className={styles.summaryGrid}>
-          <div className={styles.removalColumn} aria-labelledby="resolution-summary-heading">
-            <p id="resolution-summary-heading" className={styles.blockLabel}>
-              If you remove
-            </p>
-            <h3 className={styles.relationshipTitle}>{relationshipLabel}</h3>
-          </div>
+    <div className={styles.panel} key={title}>
+      <section className={styles.summaryBlock} aria-labelledby="decision-context-heading">
+        <h4 id="decision-context-heading" className={styles.blockLabel}>
+          {decisionTitle}
+        </h4>
+        <div className={styles.summarySection}>
+          <div
+            className={`${styles.summaryGrid} ${
+              hasComparison ? styles.summaryGridThree : styles.summaryGridTwo
+            }`}
+          >
+            <div className={styles.impactColumn} aria-labelledby="business-impact-heading">
+              <h4 id="business-impact-heading" className={styles.blockLabel}>
+                Business impact
+              </h4>
+              <BusinessConsequences items={businessConsequences} />
+            </div>
 
-          <div className={styles.impactColumn} aria-labelledby="business-impact-heading">
-            <h4 id="business-impact-heading" className={styles.blockLabel}>
-              Business impact
-            </h4>
-            <BusinessConsequences items={businessConsequences} />
-          </div>
+            <div className={styles.impactColumn} aria-labelledby="data-impact-heading">
+              <h4 id="data-impact-heading" className={styles.blockLabel}>
+                Data impact
+              </h4>
+              <DataImpactList items={dataImpact} />
+            </div>
 
-          <div className={styles.impactColumn} aria-labelledby="data-impact-heading">
-            <h4 id="data-impact-heading" className={styles.blockLabel}>
-              Data impact
-            </h4>
-            <DataImpactList items={dataImpact} />
+            {hasComparison && (
+              <div className={styles.impactColumn} aria-labelledby="comparison-heading">
+                <h4 id="comparison-heading" className={styles.blockLabel}>
+                  Compared to other options
+                </h4>
+                <ComparisonList items={comparisonNotes} />
+              </div>
+            )}
           </div>
         </div>
       </section>

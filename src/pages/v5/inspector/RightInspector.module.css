@@ -180,6 +180,33 @@
   background: #fef2f2;
 }
 
+.consequencePreviewBtn {
+  width: 100%;
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.consequencePreviewBtn:hover,
+.consequencePreviewBtn:focus-visible {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.consequencePreviewBtnActive {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
 .relTable {
   width: 100%;
   border-collapse: collapse;
@@ -235,6 +262,9 @@
   flex-shrink: 0;
   width: 20px;
   height: 20px;
+  border-radius: 5px;
+  background: #eff6ff;
+  color: #1b6fd1;
 }
 
 .inventorySectionIconEvent {
@@ -244,6 +274,8 @@
   flex-shrink: 0;
   width: 20px;
   height: 20px;
+  border-radius: 5px;
+  background: #ecfdf5;
   color: #2db87a;
 }
 

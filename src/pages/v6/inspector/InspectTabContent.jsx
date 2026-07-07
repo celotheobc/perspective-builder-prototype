@@ -162,7 +162,14 @@ function EventSettings({ id, state, progressive }) {
   );
 }
 
-function RelationshipSettings({ id, progressive, isCycle, inCycle }) {
+function RelationshipSettings({
+  id,
+  progressive,
+  isCycle,
+  inCycle,
+  onPreviewConsequences,
+  previewRelationshipId,
+}) {
   const rel = relationships.find((r) => r.id === id);
   const meta = getRelationshipMeta(id);
   if (!rel) return <p className={styles.muted}>Relationship not found.</p>;
@@ -196,6 +203,17 @@ function RelationshipSettings({ id, progressive, isCycle, inCycle }) {
       <TextBlock title="Description">{rel.label}</TextBlock>
 
       <SettingsActions>
+        {onPreviewConsequences && progressive.includedRelationshipIds.has(id) && (
+          <button
+            type="button"
+            className={`${styles.consequencePreviewBtn} ${
+              previewRelationshipId === id ? styles.consequencePreviewBtnActive : ''
+            }`}
+            onClick={() => onPreviewConsequences(id)}
+          >
+            Preview consequences
+          </button>
+        )}
         {progressive.includedRelationshipIds.has(id) && (
           <SettingsActionButton variant="danger" onClick={() => progressive.pruneRelationship(id)}>
             Remove from perspective
@@ -213,6 +231,8 @@ export default function InspectTabContent({
   cycleResolution,
   onSelectRelationship,
   onSelectEvent,
+  onPreviewRelationshipConsequences,
+  previewRelationshipId,
 }) {
   const selectedRelationshipRow = cycleResolution?.rows?.find((r) => r.id === selection.id);
 
@@ -246,6 +266,8 @@ export default function InspectTabContent({
         progressive={progressive}
         isCycle={false}
         inCycle={selectedRelationshipRow?.isConflicting}
+        onPreviewConsequences={onPreviewRelationshipConsequences}
+        previewRelationshipId={previewRelationshipId}
       />
     );
   }
@@ -257,6 +279,8 @@ export default function InspectTabContent({
         progressive={progressive}
         isCycle
         inCycle
+        onPreviewConsequences={onPreviewRelationshipConsequences}
+        previewRelationshipId={previewRelationshipId}
       />
     );
   }

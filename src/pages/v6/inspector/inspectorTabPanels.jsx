@@ -1,4 +1,8 @@
-import { agentContextMarkdown, assetMetadata } from '../../../data/mockData';
+import {
+  agentContextMarkdown,
+  assetMetadata,
+  perspectiveOverviewDependencies,
+} from '../../../data/mockData';
 import { MetaRows, TextBlock } from '../../v5/inspector/metaPanelParts';
 import { EventSourceIcon, ObjectTypeIcon } from '../../v5/inspector/inventorySectionIcons';
 import {
@@ -51,17 +55,45 @@ function InventorySection({ title, icon, items, selectedId, onSelect, emptyLabel
 }
 
 const SUMMARY_ITEMS = [
-  { tabId: 'objects', label: 'Included Objects', countKey: 'objectCount' },
-  { tabId: 'eventSources', label: 'Included Event Sources', countKey: 'eventCount' },
-  { tabId: 'relationships', label: 'Included Relationships', countKey: 'relationshipCount' },
+  { tabId: 'objects', label: 'Includes Object Types', countKey: 'objectCount' },
+  { tabId: 'eventSources', label: 'Includes Event Sources', countKey: 'eventCount' },
+  { tabId: 'relationships', label: 'Includes Relationships', countKey: 'relationshipCount' },
 ];
+
+function DependencySquareIcon({ color }) {
+  return (
+    <span
+      className={summaryStyles.dependencyIcon}
+      style={{ backgroundColor: color }}
+      aria-hidden
+    />
+  );
+}
+
+function DependencySection({ title, items }) {
+  return (
+    <section className={styles.inventorySection}>
+      <h3 className={styles.inventorySectionTitle}>{title}</h3>
+      <div className={styles.inventoryTableWrap}>
+        <ul className={styles.inventoryList}>
+          {items.map((item) => (
+            <li key={item.id} className={summaryStyles.dependencyItem}>
+              <DependencySquareIcon color={item.iconColor} />
+              <span>{item.label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
 
 function InventorySummaryCounts({ objectCount, eventCount, relationshipCount, onFocusBottomTab }) {
   const counts = { objectCount, eventCount, relationshipCount };
 
   return (
     <div className={styles.inventorySection}>
-      <h3 className={styles.inventorySectionTitle}>Included inventory</h3>
+      <h3 className={styles.inventorySectionTitle}>Inventory</h3>
       <ul className={summaryStyles.summaryList}>
         {SUMMARY_ITEMS.map((item) => (
           <li key={item.tabId}>
@@ -110,7 +142,7 @@ export function OverviewTab({
     },
     { label: 'Type', value: assetMetadata.type },
     { label: 'Reference Key', value: assetMetadata.referenceKey },
-    validationRow(hasStarted, validationStatus),
+    // validationRow(hasStarted, validationStatus),
     { label: 'Created By', value: assetMetadata.createdBy },
     { label: 'Last updated by', value: assetMetadata.lastUpdatedBy },
   ];
@@ -137,8 +169,8 @@ export function OverviewTab({
       {showSideInventory ? (
         <>
           <InventorySection
-            title={`Included Objects (${objectRows.length})`}
-            icon={<ObjectTypeIcon />}
+            title={`Includes Object Types (${objectRows.length})`}
+            icon={<ObjectTypeIcon size={14} />}
             items={objectRows}
             selectedId={selectedObjectId}
             onSelect={onSelectObject}
@@ -146,10 +178,10 @@ export function OverviewTab({
           />
 
           <InventorySection
-            title={`Included Event Sources (${eventRows.length})`}
+            title={`Includes Event Sources (${eventRows.length})`}
             icon={
               <span className={styles.inventorySectionIconEvent}>
-                <EventSourceIcon />
+                <EventSourceIcon size={14} />
               </span>
             }
             items={eventRows}
@@ -166,6 +198,18 @@ export function OverviewTab({
           onFocusBottomTab={onFocusBottomTab}
         />
       )}
+
+      <hr className={summaryStyles.dependencyDivider} />
+
+      <DependencySection
+        title="Part of"
+        items={perspectiveOverviewDependencies.partOf}
+      />
+
+      <DependencySection
+        title="Used by"
+        items={perspectiveOverviewDependencies.usedBy}
+      />
     </div>
   );
 }
