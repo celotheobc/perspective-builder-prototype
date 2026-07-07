@@ -1,10 +1,10 @@
 .page {
   min-height: 100vh;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 180px 24px 72px;
-  background:#fff;
+  padding: 48px 24px;
+  background: #fff;
 }
 
 .inner {
