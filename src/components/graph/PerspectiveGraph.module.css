@@ -90,8 +90,21 @@
   transition: d 0.48s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.canvas :global(.react-flow__edge-labels) {
+  z-index: 100;
+  pointer-events: none;
+}
+
+.canvas :global(.react-flow__edges) {
+  z-index: 1;
+}
+
+.canvas :global(.react-flow__nodes) {
+  z-index: 10;
+}
+
 .canvas :global(.react-flow__edge-interaction) {
-  stroke-width: 14px;
+  stroke-width: 18px;
 }
 
 .canvas :global(.react-flow__controls) {

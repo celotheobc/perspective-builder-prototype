@@ -46,7 +46,7 @@ const edgeTypes = { route: RouteEdge };
 
 const defaultEdgeOptions = {
   type: 'route',
-  interactionWidth: 14,
+  interactionWidth: 18,
   markerEnd: {
     type: MarkerType.ArrowClosed,
     width: 16,
@@ -97,6 +97,7 @@ export default function PerspectiveGraph({
     const ctx = {
       ...graphContextRef.current,
       enableInspectorSelection: Boolean(graphSelectionRef.current),
+      onHoverEdge: graphSelectionRef.current?.onHoverEdge,
     };
     if (mode === 'route-ambiguity') {
       return buildRouteAmbiguityGraph(ctx);
@@ -134,9 +135,6 @@ export default function PerspectiveGraph({
       graphContext.previewBridgeWouldCreateCycle ? 'cycle' : 'safe',
       graphContext.cycleActive ? 'cycle-on' : 'cycle-off',
       graphContext.isResolved ? 'resolved' : 'unresolved',
-      graphContext.highlightedRelationshipId ?? '',
-      graphContext.inspectorSelection?.type ?? '',
-      graphContext.inspectorSelection?.id ?? '',
     ].join('§');
   }, [
     mode,
@@ -156,9 +154,20 @@ export default function PerspectiveGraph({
     graphContext.previewBridgeWouldCreateCycle,
     graphContext.cycleActive,
     graphContext.isResolved,
-    graphContext.highlightedRelationshipId,
-    graphContext.inspectorSelection,
   ]);
+
+  const visualStateKey = useMemo(
+    () =>
+      [
+        graphContext.highlightedRelationshipId ?? '',
+        graphContext.inspectorSelection?.type ?? '',
+        graphContext.inspectorSelection?.id ?? '',
+      ].join('§'),
+    [
+      graphContext.highlightedRelationshipId,
+      graphContext.inspectorSelection,
+    ],
+  );
 
   const getPaneSize = useCallback(() => {
     const el = canvasRef.current;
@@ -380,6 +389,13 @@ export default function PerspectiveGraph({
       relationshipsOnly,
     });
   }, [graphEffectKey, layoutEpoch]);
+
+  useLayoutEffect(() => {
+    if (!initialRevealDone.current || !nodesRef.current.length) return;
+    const { edges: rawEdges } = buildGraphRef.current();
+    const positioned = positionsFromNodes(nodesRef.current);
+    setEdges(enrichEdgesWithHandles(rawEdges, positioned));
+  }, [visualStateKey, setEdges]);
 
   const onInit = useCallback((instance) => {
     flowRef.current = instance;

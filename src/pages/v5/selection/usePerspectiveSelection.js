@@ -63,7 +63,7 @@ export function usePerspectiveSelection() {
     hoverClearRef.current = setTimeout(() => {
       setHighlightedRelationshipId(null);
       hoverClearRef.current = null;
-    }, 48);
+    }, 100);
   }, []);
 
   const graphSelection = {

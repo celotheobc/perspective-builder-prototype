@@ -1,8 +1,8 @@
 import ResizeHandle from '../../v1_5/layout/ResizeHandle';
 import CycleResolutionInspectorV7 from './CycleResolutionInspectorV7';
 import ConnectionDecisionInspectorV7 from './ConnectionDecisionInspectorV7';
-import ResolutionModeHeader from './ResolutionModeHeader';
-import ConnectionDecisionHeader from './ConnectionDecisionHeader';
+import DecisionPanelHeader from './DecisionPanelHeader';
+import { CycleResolutionIntro, ConnectionDecisionIntro } from './DecisionPanelIntro';
 import { objectName } from '../../../components/configuration/connectionPath/PathRouteLabel';
 import { SELECTION_TYPES } from '../../v5/selection/usePerspectiveSelection';
 import InspectTabContent from '../../v6/inspector/InspectTabContent';
@@ -56,8 +56,7 @@ export default function RightInspector({
   );
   const connectionPrompt = progressive.connectionPrompt;
   const inConnectionMode = Boolean(connectionPrompt);
-  const forceResolutionPanel =
-    inResolutionMode && selection.type !== SELECTION_TYPES.CYCLE_EDGE;
+  const forceResolutionPanel = inResolutionMode;
   const forceConnectionPanel =
     inConnectionMode && !forceResolutionPanel;
   const showSpecialPanel = forceResolutionPanel || forceConnectionPanel;
@@ -79,20 +78,9 @@ export default function RightInspector({
         />
       )}
       <div className={styles.panel}>
-        {!collapsed && forceResolutionPanel && (
+        {!collapsed && showSpecialPanel && (
           <header className={styles.panelHeader}>
-            <ResolutionModeHeader />
-            <button type="button" className={styles.collapseBtn} onClick={onToggle}>
-              ▸
-            </button>
-          </header>
-        )}
-        {!collapsed && forceConnectionPanel && (
-          <header className={styles.panelHeader}>
-            <ConnectionDecisionHeader
-              objectName={connectionObjectName}
-              pathCount={connectionPrompt.paths.length}
-            />
+            <DecisionPanelHeader />
             <button type="button" className={styles.collapseBtn} onClick={onToggle}>
               ▸
             </button>
@@ -132,6 +120,7 @@ export default function RightInspector({
           <div className={styles.panelBody}>
             {forceResolutionPanel ? (
               <div className={styles.tabContent}>
+                <CycleResolutionIntro />
                 <CycleResolutionInspectorV7
                   rows={cycleResolution.rows}
                   highlightedRelationshipId={cycleResolution.highlightedRelationshipId}
@@ -143,6 +132,10 @@ export default function RightInspector({
               </div>
             ) : forceConnectionPanel ? (
               <div className={styles.tabContent}>
+                <ConnectionDecisionIntro
+                  objectName={connectionObjectName}
+                  pathCount={connectionPrompt.paths.length}
+                />
                 <ConnectionDecisionInspectorV7
                   prompt={connectionPrompt}
                   includedObjects={progressive.includedObjects}

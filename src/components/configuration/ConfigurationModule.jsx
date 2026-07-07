@@ -11,6 +11,7 @@ export default function ConfigurationModule({
   progressive,
   routeAmbiguity,
   highlightedRelationshipId = null,
+  cycleResolutionCardsByRelId = null,
   layout = 'stacked',
   graphSelection = null,
   fillGraph = false,
@@ -70,6 +71,7 @@ export default function ConfigurationModule({
               mode="progressive"
               graphContext={{
                 ...graphContext,
+                cycleResolutionCardsByRelId,
                 unifiedSuggestions: canvasUiVariant === 'v2',
               }}
               canvasUiVariant={canvasUiVariant}

@@ -11,6 +11,7 @@ export default function AssetEditorLayout({
   progressive,
   graphSelection,
   highlightedRelationshipId,
+  cycleResolutionCardsByRelId = null,
   rightInspector,
   bottomPanel,
   hideMetrics = false,
@@ -28,6 +29,7 @@ export default function AssetEditorLayout({
             progressive={progressive}
             routeAmbiguity={ROUTE_STUB}
             highlightedRelationshipId={highlightedRelationshipId}
+            cycleResolutionCardsByRelId={cycleResolutionCardsByRelId}
             layout="canvas"
             fillGraph
             hideSummary

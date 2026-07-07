@@ -7,19 +7,25 @@
   gap: 8px;
 }
 
-.loopCardRecommended {
-  border-color: #bfdbfe;
-  background: #f8fbff;
+.loopCard.loopCardRecommended {
+  /* border-color: #a2d3b3; */
+  /* border-left-width: 4px; */
+  /* border-left-color: #4ade80; */
+  background: #f3fbf6;
 }
 
-.loopCardRecommended.loopCardPreviewing {
-  border-color: #93c5fd;
-  background: #eff6ff;
+.loopCard.loopCardRecommended.loopCardPreviewing {
+  border-color: #cbd5e1;
+  border-left-width: 1px;
+  border-left-color: #cbd5e1;
+  background: #f1f5f9;
 }
 
-.loopCardRecommended.loopCardHover {
-  border-color: #93c5fd;
-  background: #eff6ff;
+.loopCard.loopCardRecommended.loopCardHover {
+  border-color: #cbd5e1;
+  border-left-width: 1px;
+  border-left-color: #cbd5e1;
+  background: #f8fafc;
 }
 
 .optionBadges {
@@ -39,10 +45,14 @@
   line-height: 1.3;
 }
 
-.optionBadgeImpact {
-  color: #1d4ed8;
-  background: #dbeafe;
-  border: 1px solid #bfdbfe;
+.optionBadgeRecommended {
+  color: #047857;
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .optionBadgeCycle {
@@ -78,14 +88,31 @@
 }
 
 .loopCard:has(.loopRemoveSecondary:hover),
-.loopCard:has(.loopRemoveSecondary:focus-visible) {
+.loopCard:has(.loopRemoveSecondary:focus-visible),
+.loopCardRemoveHover {
   border-style: dashed;
   border-color: #fca5a5;
   background: #fff1f2;
 }
 
+.loopCard.loopCardRecommended:has(.loopRemoveSecondary:hover),
+.loopCard.loopCardRecommended:has(.loopRemoveSecondary:focus-visible),
+.loopCard.loopCardRecommended.loopCardRemoveHover {
+  border-left-width: 1px;
+  background: #fff1f2;
+}
+
+.loopCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .loopName {
   margin: 0;
+  flex: 1;
+  min-width: 0;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.35;

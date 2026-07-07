@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { rankCycleResolutionOptions } from '../data/cycleResolutionRecommendation';
 import styles from './CycleResolutionInspectorV7.module.css';
 
@@ -8,7 +8,8 @@ function ResolutionOptionCard({
   isLowestImpact = false,
   wouldCreateCycle = false,
   previewing,
-  hovering,
+  graphRemoveHover,
+  panelHover,
   cardRef,
   onPreviewImpact,
   onRemoveRelationship,
@@ -18,24 +19,24 @@ function ResolutionOptionCard({
   return (
     <li ref={cardRef}>
       <div
-        className={`${styles.loopCard} ${isLowestImpact ? styles.loopCardRecommended : ''} ${previewing ? styles.loopCardPreviewing : ''} ${hovering ? styles.loopCardHover : ''}`}
+        className={`${styles.loopCard} ${isLowestImpact ? styles.loopCardRecommended : ''} ${previewing ? styles.loopCardPreviewing : ''} ${graphRemoveHover ? styles.loopCardRemoveHover : ''} ${panelHover ? styles.loopCardHover : ''}`}
         onMouseEnter={onHoverStart}
         onMouseLeave={onHoverEnd}
       >
-        <p className={styles.loopName}>{row.name}</p>
+        <div className={styles.loopCardHeader}>
+          <p className={styles.loopName}>{row.name}</p>
+          {isLowestImpact && (
+            <span className={`${styles.optionBadge} ${styles.optionBadgeRecommended}`}>
+              Recommended
+            </span>
+          )}
+        </div>
 
-        {(isLowestImpact || wouldCreateCycle) && (
+        {wouldCreateCycle && (
           <div className={styles.optionBadges}>
-            {isLowestImpact && (
-              <span className={`${styles.optionBadge} ${styles.optionBadgeImpact}`}>
-                Lowest impact
-              </span>
-            )}
-            {wouldCreateCycle && (
-              <span className={`${styles.optionBadge} ${styles.optionBadgeCycle}`}>
-                Creates cycle
-              </span>
-            )}
+            <span className={`${styles.optionBadge} ${styles.optionBadgeCycle}`}>
+              Creates cycle
+            </span>
           </div>
         )}
 
@@ -81,6 +82,7 @@ export default function CycleResolutionInspectorV7({
   );
   const cardRefs = useRef(new Map());
   const hoveredFromPanelRef = useRef(false);
+  const [panelHoveredId, setPanelHoveredId] = useState(null);
 
   const restoreHighlight = () => {
     onHighlightRelationship(previewRelationshipId ?? null);
@@ -102,17 +104,23 @@ export default function CycleResolutionInspectorV7({
   const bindHover = (id) => ({
     onHoverStart: () => {
       hoveredFromPanelRef.current = true;
+      setPanelHoveredId(id);
       onHighlightRelationship(id);
     },
     onHoverEnd: () => {
       hoveredFromPanelRef.current = false;
+      setPanelHoveredId(null);
       restoreHighlight();
     },
   });
 
   const cardState = (id) => ({
     previewing: previewRelationshipId === id,
-    hovering: highlightedRelationshipId === id && previewRelationshipId !== id,
+    graphRemoveHover:
+      highlightedRelationshipId === id &&
+      previewRelationshipId !== id &&
+      panelHoveredId !== id,
+    panelHover: panelHoveredId === id,
   });
 
   if (!rankedOptions.length) return null;

@@ -1,13 +1,18 @@
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback } from 'react';
 import {
   BaseEdge,
   EdgeLabelRenderer,
   getSmoothStepPath,
   getStraightPath,
 } from '@xyflow/react';
-import { getRelationshipPrunePreview } from '../../data/cycleDetection';
+import CutRelationshipIcon from '../icons/CutRelationshipIcon';
 import { edgeMarker, edgePathStyle, getEdgeVisual } from '../../utils/edgeVisual';
 import styles from './RouteEdge.module.css';
+
+function isWithinScissorsTarget(relId, target) {
+  if (!(target instanceof Element)) return false;
+  return Boolean(target.closest(`[data-scissors-for="${relId}"]`));
+}
 
 function RouteEdgeComponent({
   id,
@@ -26,6 +31,7 @@ function RouteEdgeComponent({
     highlightCycle,
     showScissors,
     onPrune,
+    onHoverEdge,
     relId,
     isPreviewBridge,
     previewBridgeCreatesCycle,
@@ -34,16 +40,14 @@ function RouteEdgeComponent({
     isInspectorSelected,
     contextOverview,
     directPath,
+    cycleResolutionCard,
   } = data ?? {};
-
-  const [hovered, setHovered] = useState(false);
 
   const visual = getEdgeVisual({
     included,
     potential,
     pruned,
     highlightCycle,
-    previewRemove: hovered,
     isPreviewBridge,
     previewBridgeCreatesCycle,
     highlightFromTable,
@@ -106,22 +110,26 @@ function RouteEdgeComponent({
       (previewBridgeCreatesCycle
         ? styles.previewBridgeCycle
         : styles.previewBridgeSafe),
-    hovered && !highlightFromTable && styles.previewRemove,
   ]
     .filter(Boolean)
     .join(' ');
 
-  const preview = relId ? getRelationshipPrunePreview(relId) : null;
   const labelTransform = `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`;
+  const scissorsHighlighted = Boolean(showScissors && highlightFromTable);
+  const hoverCard = cycleResolutionCard ?? null;
 
-  const handleScissorsEnter = useCallback(() => setHovered(true), []);
+  const handleScissorsEnter = useCallback(() => {
+    onHoverEdge?.(relId);
+  }, [onHoverEdge, relId]);
+
   const handleScissorsLeave = useCallback((event) => {
-    const related = event?.relatedTarget;
-    if (related instanceof Element && related.closest(`[data-scissors-for="${relId}"]`)) {
-      return;
-    }
-    setHovered(false);
-  }, [relId]);
+    if (isWithinScissorsTarget(relId, event?.relatedTarget)) return;
+    onHoverEdge?.(null);
+  }, [onHoverEdge, relId]);
+
+  const handleScissorsClick = useCallback(() => {
+    onPrune?.(relId);
+  }, [onPrune, relId]);
 
   return (
     <>
@@ -131,34 +139,45 @@ function RouteEdgeComponent({
         className={edgeClass}
         style={edgePathStyle(visual)}
         markerEnd={edgeMarker(visual.markerColor)}
-        interactionWidth={20}
+        interactionWidth={showScissors ? 0 : 24}
       />
       {showScissors && !pruned && (
         <EdgeLabelRenderer>
-          <div className={styles.labelWrap} style={{ transform: labelTransform }}>
+          <div
+            className={`${styles.labelWrap} ${scissorsHighlighted ? styles.labelWrapActive : ''}`}
+            style={{ transform: labelTransform }}
+          >
             <div
-              className={styles.scissorsWrap}
+              className={`${styles.scissorsWrap} ${scissorsHighlighted ? styles.scissorsWrapActive : ''}`}
               data-scissors-for={relId}
               onMouseEnter={handleScissorsEnter}
               onMouseLeave={handleScissorsLeave}
+              onClick={handleScissorsClick}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  handleScissorsClick();
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={hoverCard?.name ? `Remove relationship: ${hoverCard.name}` : 'Remove relationship'}
             >
-              <button
-                type="button"
-                className={`${styles.edgeScissors} ${hovered ? styles.edgeScissorsActive : ''}`}
-                aria-label={preview?.title}
-                onClick={() => onPrune?.(relId)}
-                onFocus={handleScissorsEnter}
-                onBlur={handleScissorsLeave}
-              >
-                ✂
-              </button>
-              {preview && (
-                <span className={styles.pruneTooltip} role="tooltip">
-                  <span className={styles.tooltipTitle}>{preview.title}</span>
-                  <span className={styles.tooltipDetail}>{preview.detail}</span>
-                </span>
-              )}
+              <CutRelationshipIcon size={18} className={styles.scissorsIcon} />
             </div>
+            {hoverCard && (
+              <div className={styles.scissorsHoverCard} role="tooltip">
+                <div className={styles.scissorsHoverCardHeader}>
+                  <p className={styles.scissorsHoverCardTitle}>{hoverCard.name}</p>
+                  {hoverCard.isRecommended && (
+                    <span className={styles.scissorsHoverCardBadge}>Recommended</span>
+                  )}
+                </div>
+                <p className={styles.scissorsHoverCardSummary}>{hoverCard.summary}</p>
+                <hr className={styles.scissorsHoverCardDivider} />
+                <p className={styles.scissorsHoverCardAction}>Click to remove</p>
+              </div>
+            )}
           </div>
         </EdgeLabelRenderer>
       )}

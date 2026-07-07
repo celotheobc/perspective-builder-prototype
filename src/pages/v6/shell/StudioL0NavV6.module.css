@@ -25,7 +25,7 @@
 
 .placementLabel {
   display: inline-block;
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
   font-size: 10px;
   font-weight: 700;
   line-height: 1;

@@ -4,11 +4,7 @@ import {
   perspectiveOverviewDependencies,
 } from '../../../data/mockData';
 import { MetaRows, TextBlock } from '../../v5/inspector/metaPanelParts';
-import { EventSourceIcon, ObjectTypeIcon } from '../../v5/inspector/inventorySectionIcons';
-import {
-  CacheTab,
-  InventoryTable,
-} from '../../v5/inspector/inspectorTabPanels';
+import { CacheTab, InventoryTable } from '../../v5/inspector/inspectorTabPanels';
 import { isSideInventory } from '../inventory/inventoryPlacement';
 import styles from '../../v5/inspector/RightInspector.module.css';
 import summaryStyles from './inspectorTabPanels.module.css';
@@ -17,6 +13,12 @@ export { CacheTab, InventoryTable };
 
 const DESCRIPTION =
   'Order-to-Cash semantic scope. Build on the graph — relationships, issues, and AI context live in the panel below.';
+
+const INVENTORY_ICON_COLORS = {
+  object: '#1b6fd1',
+  event: '#2db87a',
+  relationship: '#8b5cf6',
+};
 
 function statusClass(status) {
   if (status === 'Valid') return styles.statusValid;
@@ -35,30 +37,52 @@ function validationRow(hasStarted, validationStatus) {
   };
 }
 
-function InventorySection({ title, icon, items, selectedId, onSelect, emptyLabel }) {
+function InventoryListIcon({ color }) {
   return (
-    <section className={styles.inventorySection}>
-      <div className={styles.inventorySectionHeader}>
-        <span className={styles.inventorySectionIcon} aria-hidden>
-          {icon}
-        </span>
-        <h3 className={styles.inventorySectionTitle}>{title}</h3>
-      </div>
-      <InventoryTable
-        items={items}
-        selectedId={selectedId}
-        onSelect={onSelect}
-        emptyLabel={emptyLabel}
-      />
-    </section>
+    <span
+      className={summaryStyles.dependencyIcon}
+      style={{ backgroundColor: color }}
+      aria-hidden
+    />
   );
 }
 
-const SUMMARY_ITEMS = [
-  { tabId: 'objects', label: 'Includes Object Types', countKey: 'objectCount' },
-  { tabId: 'eventSources', label: 'Includes Event Sources', countKey: 'eventCount' },
-  { tabId: 'relationships', label: 'Includes Relationships', countKey: 'relationshipCount' },
-];
+function IncludesListSection({
+  title,
+  items,
+  iconColor,
+  selectedId,
+  onSelect,
+  emptyLabel,
+}) {
+  return (
+    <section className={styles.inventorySection}>
+      <h3 className={styles.inventorySectionTitle}>{title}</h3>
+      <div className={styles.inventoryTableWrap}>
+        {!items.length ? (
+          <p className={summaryStyles.listEmpty}>{emptyLabel}</p>
+        ) : (
+          <ul className={styles.inventoryList}>
+            {items.map((item) => (
+              <li key={item.id}>
+                <button
+                  type="button"
+                  className={`${summaryStyles.listRow} ${
+                    selectedId === item.id ? summaryStyles.listRowSelected : ''
+                  }`}
+                  onClick={() => onSelect?.(item.id)}
+                >
+                  <InventoryListIcon color={iconColor} />
+                  <span>{item.name}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  );
+}
 
 function DependencySquareIcon({ color }) {
   return (
@@ -77,7 +101,7 @@ function DependencySection({ title, items }) {
       <div className={styles.inventoryTableWrap}>
         <ul className={styles.inventoryList}>
           {items.map((item) => (
-            <li key={item.id} className={summaryStyles.dependencyItem}>
+            <li key={item.id} className={summaryStyles.listRowStatic}>
               <DependencySquareIcon color={item.iconColor} />
               <span>{item.label}</span>
             </li>
@@ -88,27 +112,57 @@ function DependencySection({ title, items }) {
   );
 }
 
-function InventorySummaryCounts({ objectCount, eventCount, relationshipCount, onFocusBottomTab }) {
+const PERSPECTIVE_CONTAINS_ITEMS = [
+  {
+    tabId: 'objects',
+    label: 'Object Types',
+    countKey: 'objectCount',
+    iconColor: INVENTORY_ICON_COLORS.object,
+  },
+  {
+    tabId: 'eventSources',
+    label: 'Event Sources',
+    countKey: 'eventCount',
+    iconColor: INVENTORY_ICON_COLORS.event,
+  },
+  {
+    tabId: 'relationships',
+    label: 'Relationships',
+    countKey: 'relationshipCount',
+    iconColor: INVENTORY_ICON_COLORS.relationship,
+  },
+];
+
+function PerspectiveContainsSection({
+  objectCount,
+  eventCount,
+  relationshipCount,
+  onFocusBottomTab,
+}) {
   const counts = { objectCount, eventCount, relationshipCount };
 
   return (
-    <div className={styles.inventorySection}>
-      <h3 className={styles.inventorySectionTitle}>Inventory</h3>
-      <ul className={summaryStyles.summaryList}>
-        {SUMMARY_ITEMS.map((item) => (
-          <li key={item.tabId}>
-            <button
-              type="button"
-              className={summaryStyles.summaryRowButton}
-              onClick={() => onFocusBottomTab?.(item.tabId)}
-            >
-              <span className={styles.metaLabel}>{item.label}</span>
-              <span className={styles.metaValue}>{counts[item.countKey]}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <section className={styles.inventorySection}>
+      <h3 className={styles.inventorySectionTitle}>Perspective contains</h3>
+      <div className={styles.inventoryTableWrap}>
+        <ul className={styles.inventoryList}>
+          {PERSPECTIVE_CONTAINS_ITEMS.map((item) => (
+            <li key={item.tabId}>
+              <button
+                type="button"
+                className={summaryStyles.listRow}
+                onClick={() => onFocusBottomTab?.(item.tabId)}
+              >
+                <InventoryListIcon color={item.iconColor} />
+                <span>
+                  {item.label} ({counts[item.countKey]})
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }
 
@@ -168,22 +222,18 @@ export function OverviewTab({
 
       {showSideInventory ? (
         <>
-          <InventorySection
-            title={`Includes Object Types (${objectRows.length})`}
-            icon={<ObjectTypeIcon size={14} />}
+          <IncludesListSection
+            title={`Included Object Types (${objectRows.length})`}
+            iconColor={INVENTORY_ICON_COLORS.object}
             items={objectRows}
             selectedId={selectedObjectId}
             onSelect={onSelectObject}
             emptyLabel="None included yet"
           />
 
-          <InventorySection
-            title={`Includes Event Sources (${eventRows.length})`}
-            icon={
-              <span className={styles.inventorySectionIconEvent}>
-                <EventSourceIcon size={14} />
-              </span>
-            }
+          <IncludesListSection
+            title={`Included Event Sources (${eventRows.length})`}
+            iconColor={INVENTORY_ICON_COLORS.event}
             items={eventRows}
             selectedId={selectedEventId}
             onSelect={onSelectEvent}
@@ -191,7 +241,7 @@ export function OverviewTab({
           />
         </>
       ) : (
-        <InventorySummaryCounts
+        <PerspectiveContainsSection
           objectCount={objectRows.length}
           eventCount={eventRows.length}
           relationshipCount={relationshipCount}

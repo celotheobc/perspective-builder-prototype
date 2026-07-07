@@ -176,8 +176,10 @@ export function buildProgressiveGraph(ctx) {
         pruned: ctx.excludedRelationships?.has(r.id),
         showScissors,
         onPrune: ctx.onPrune,
+        onHoverEdge: ctx.onHoverEdge,
         highlightFromTable,
         highlightFromTableCycle,
+        cycleResolutionCard: ctx.cycleResolutionCardsByRelId?.[r.id] ?? null,
         isInspectorSelected: getInspectorEdgeSelected(r.id, ctx.inspectorSelection, {
           cycleActive: ctx.cycleActive,
           isResolved: ctx.isResolved,
@@ -315,9 +317,11 @@ export function buildRouteAmbiguityGraph(ctx) {
         pruned: ctx.excludedRelationships?.has(r.id),
         showScissors,
         onPrune: ctx.onPrune,
+        onHoverEdge: ctx.onHoverEdge,
         relId: r.id,
         highlightFromTable,
         highlightFromTableCycle,
+        cycleResolutionCard: ctx.cycleResolutionCardsByRelId?.[r.id] ?? null,
         isInspectorSelected: getInspectorEdgeSelected(r.id, ctx.inspectorSelection, {
           cycleActive: ctx.cycleActive,
           isResolved: ctx.isResolved,

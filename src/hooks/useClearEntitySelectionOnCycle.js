@@ -5,6 +5,7 @@ const ENTITY_SELECTION_TYPES = new Set([
   'event',
   'metric',
   'relationship',
+  'cycleEdge',
 ]);
 
 /**

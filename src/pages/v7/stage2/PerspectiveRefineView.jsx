@@ -20,6 +20,7 @@ import { useClearEntitySelectionOnCycle } from '../../../hooks/useClearEntitySel
 import { INVENTORY_PLACEMENT } from '../../v6/inventory/inventoryPlacement';
 import { useInventoryPlacement } from '../../v6/inventory/InventoryPlacementContext';
 import { getCycleImpactPreview } from '../data/cycleImpactPreviews';
+import { rankCycleResolutionOptions } from '../data/cycleResolutionRecommendation';
 import {
   getConnectionConsequencePreview,
   KEEP_DISCONNECTED_CHOICE,
@@ -240,9 +241,18 @@ export default function PerspectiveRefineView({
         },
       ]);
       setPreviewRelationshipId(null);
+      setHighlightedRelationshipId(null);
+      selectCanvas();
+      progressive.clearExpansionFocus();
+      setRightCollapsed(false);
       progressive.pruneRelationship(relId);
     },
-    [progressive, relationshipTable.rows],
+    [
+      progressive,
+      relationshipTable.rows,
+      selectCanvas,
+      setHighlightedRelationshipId,
+    ],
   );
 
   const handleReviewResolvedDecision = useCallback(
@@ -321,6 +331,31 @@ export default function PerspectiveRefineView({
     setPreviewRelationshipId(null);
   }, [cycleActive]);
 
+  const prevCycleEdgeKeyRef = useRef('');
+
+  useEffect(() => {
+    if (!progressive.cycleActive) {
+      prevCycleEdgeKeyRef.current = '';
+      return;
+    }
+
+    const cycleEdgeKey = [...progressive.cycleEdgeIds].sort().join(',');
+    if (prevCycleEdgeKeyRef.current && prevCycleEdgeKeyRef.current !== cycleEdgeKey) {
+      setPreviewRelationshipId(null);
+      setHighlightedRelationshipId(null);
+      selectCanvas();
+      progressive.clearExpansionFocus();
+      setRightCollapsed(false);
+    }
+    prevCycleEdgeKeyRef.current = cycleEdgeKey;
+  }, [
+    progressive.cycleActive,
+    progressive.cycleEdgeIds,
+    progressive.clearExpansionFocus,
+    selectCanvas,
+    setHighlightedRelationshipId,
+  ]);
+
   const { validationStatus } = useGraphBuilderContext({
     experience: EXPERIENCES.PROGRESSIVE,
     progressive,
@@ -359,6 +394,22 @@ export default function PerspectiveRefineView({
     highlightedRelationshipId: effectiveGraphHighlight,
   };
 
+  const cycleResolutionCardsByRelId = useMemo(() => {
+    if (!progressive.cycleActive || progressive.isCycleResolved) return {};
+
+    const loopRows = relationshipTable.rows.filter((row) => row.isConflicting);
+    return Object.fromEntries(
+      rankCycleResolutionOptions(loopRows).map((row) => [
+        row.id,
+        {
+          name: row.name,
+          summary: row.summary,
+          isRecommended: row.isLowestImpact,
+        },
+      ]),
+    );
+  }, [progressive.cycleActive, progressive.isCycleResolved, relationshipTable.rows]);
+
   return (
     <>
       <div className={layoutStyles.page}>
@@ -366,6 +417,7 @@ export default function PerspectiveRefineView({
           progressive={progressive}
           graphSelection={graphSelection}
           highlightedRelationshipId={effectiveGraphHighlight}
+          cycleResolutionCardsByRelId={cycleResolutionCardsByRelId}
           hideMetrics
           combinedCanvasToolbar
           showProcessFilter
