@@ -180,6 +180,7 @@ export default function RightInspector({
                     inventoryPlacement={inventoryPlacement}
                     relationshipCount={relationshipCount}
                     onFocusBottomTab={onFocusBottomTab}
+                    hideAgentContext
                   />
                 )}
                 {activeTab === 'cache' && <CacheTab />}

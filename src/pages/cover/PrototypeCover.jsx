@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PerspectivePuckIcon from '../../components/icons/PerspectivePuckIcon';
 import styles from './PrototypeCover.module.css';
 
 const VERSIONS = [
@@ -53,7 +54,100 @@ const VERSIONS = [
   },
 ];
 
-const DEFAULT_EXPANDED = new Set([VERSIONS[0].id]);
+const DEFAULT_EXPANDED = new Set();
+
+const [FEATURED_VERSION, ...ARCHIVE_VERSIONS] = VERSIONS;
+
+function ExpandChevron({ expanded }) {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      aria-hidden
+      className={`${styles.expandChevron}${expanded ? ` ${styles.expandChevronOpen}` : ''}`}
+    >
+      <path
+        d="M4.5 2.5L8 6l-3.5 3.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function VersionPanel({
+  v,
+  isExpanded,
+  featured = false,
+  inList = false,
+  launchOnClick = false,
+  onToggle,
+  onKeyDown,
+  onSelectVersion,
+}) {
+  const showDescription = launchOnClick || isExpanded;
+
+  const handleClick = () => {
+    if (launchOnClick) {
+      onSelectVersion(v.id);
+      return;
+    }
+    onToggle(v.id);
+  };
+
+  const handleKeyDown = (e) => {
+    if (launchOnClick) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onSelectVersion(v.id);
+      }
+      return;
+    }
+    onKeyDown(e, v.id);
+  };
+
+  return (
+    <article
+      className={`${styles.item}${featured ? ` ${styles.itemFeatured}` : ''}${
+        inList ? ` ${styles.itemInList}` : ''
+      }${launchOnClick ? ` ${styles.itemLaunchable}` : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-expanded={launchOnClick ? undefined : isExpanded}
+      aria-label={launchOnClick ? `Open ${v.title}` : undefined}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+    >
+      <div className={styles.headerRow}>
+        {inList && (
+          <span className={styles.expandChevronWrap}>
+            <ExpandChevron expanded={isExpanded} />
+          </span>
+        )}
+        <div className={styles.rowMain}>
+          <h2 className={styles.versionTitle}>{v.title}</h2>
+          <span className={styles.versionChip}>{v.tag}</span>
+        </div>
+        <button
+          type="button"
+          className={styles.openBtn}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelectVersion(v.id);
+          }}
+        >
+          Open
+        </button>
+      </div>
+
+      {showDescription && <p className={styles.description}>{v.description}</p>}
+    </article>
+  );
+}
 
 export default function PrototypeCover({ onSelectVersion }) {
   const [expanded, setExpanded] = useState(() => new Set(DEFAULT_EXPANDED));
@@ -78,48 +172,39 @@ export default function PrototypeCover({ onSelectVersion }) {
     <div className={styles.page}>
       <div className={styles.inner}>
         <header className={styles.header}>
+          <div className={styles.brandMark} aria-hidden>
+            <PerspectivePuckIcon size={52} />
+          </div>
           <h1 className={styles.title}>Perspective Builder</h1>
           <p className={styles.subtitle}>
             Create and refine Perspectives within the Context Model.
           </p>
         </header>
 
-        <div className={styles.list} role="list">
-          {VERSIONS.map((v) => {
-            const isExpanded = expanded.has(v.id);
-            return (
-              <article
-                key={v.id}
-                className={`${styles.item}${isExpanded ? ` ${styles.itemExpanded}` : ''}`}
-                role="button"
-                tabIndex={0}
-                aria-expanded={isExpanded}
-                onClick={() => toggleExpanded(v.id)}
-                onKeyDown={(e) => handleCardKeyDown(e, v.id)}
-              >
-                <div className={styles.headerRow}>
-                  <div className={styles.rowMain}>
-                    <span className={styles.versionChip}>{v.tag}</span>
-                    <h2 className={styles.versionTitle}>{v.title}</h2>
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.openBtn}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectVersion(v.id);
-                    }}
-                  >
-                    Open
-                  </button>
-                </div>
+        <div className={styles.list}>
+          <VersionPanel
+            v={FEATURED_VERSION}
+            isExpanded
+            featured
+            launchOnClick
+            onToggle={toggleExpanded}
+            onKeyDown={handleCardKeyDown}
+            onSelectVersion={onSelectVersion}
+          />
 
-                {isExpanded && (
-                  <p className={styles.description}>{v.description}</p>
-                )}
-              </article>
-            );
-          })}
+          <div className={styles.archiveList} role="list">
+            {ARCHIVE_VERSIONS.map((v) => (
+              <VersionPanel
+                key={v.id}
+                v={v}
+                isExpanded={expanded.has(v.id)}
+                inList
+                onToggle={toggleExpanded}
+                onKeyDown={handleCardKeyDown}
+                onSelectVersion={onSelectVersion}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

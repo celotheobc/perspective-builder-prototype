@@ -181,6 +181,7 @@ export function OverviewTab({
   inventoryPlacement,
   relationshipCount,
   onFocusBottomTab,
+  hideAgentContext = false,
 }) {
   const hasStarted = progressive.hasStarted;
   const associatedProcess = sourceProcessId
@@ -216,9 +217,11 @@ export function OverviewTab({
         {DESCRIPTION}
       </TextBlock>
 
-      <TextBlock title="Agent context" empty={!hasStarted}>
-        {agentExcerpt}
-      </TextBlock>
+      {!hideAgentContext && (
+        <TextBlock title="Agent context" empty={!hasStarted}>
+          {agentExcerpt}
+        </TextBlock>
+      )}
 
       {showSideInventory ? (
         <>

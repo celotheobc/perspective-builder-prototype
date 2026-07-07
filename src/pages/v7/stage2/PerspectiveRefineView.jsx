@@ -287,6 +287,19 @@ export default function PerspectiveRefineView({
   ]);
 
   const cycleActive = progressive.cycleActive && !progressive.isCycleResolved;
+  const inConnectionResolveMode = Boolean(progressive.connectionPrompt);
+  const showConsequencesTab =
+    cycleActive ||
+    inConnectionResolveMode ||
+    Boolean(previewRelationshipId) ||
+    Boolean(previewConnectionChoiceId);
+
+  useEffect(() => {
+    if (!showConsequencesTab && bottomTab === 'consequences') {
+      setBottomTab('issues');
+    }
+  }, [showConsequencesTab, bottomTab, setBottomTab]);
+
   const effectiveGraphHighlight =
     cycleActive && previewRelationshipId
       ? (highlightedRelationshipId ?? previewRelationshipId)
@@ -483,6 +496,7 @@ export default function PerspectiveRefineView({
               highlightedRelationshipId={effectiveGraphHighlight}
               perspectiveEmpty={!progressive.hasStarted}
               inventoryPlacement={inventoryPlacement}
+              showConsequencesTab={showConsequencesTab}
             />
           }
         />

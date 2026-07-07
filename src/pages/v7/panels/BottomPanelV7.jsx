@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { agentContextMarkdown } from '../../../data/mockData';
 import ResizeHandle from '../../v1_5/layout/ResizeHandle';
 import PanelEmptyHint from '../../v5/components/PanelEmptyHint';
 import panelTabStyles from '../../v5/components/PanelTabs.module.css';
@@ -51,21 +52,29 @@ function DataTable({ columns, rows, selectedId, highlightedId, onSelectRow, onHo
   );
 }
 
+const AGENT_CONTEXT_TAB = { id: 'agentContext', label: 'Agent context' };
 const CONSEQUENCES_TAB = { id: 'consequences', label: 'Consequences' };
 
-const TABS_SIDE = [
+const TABS_SIDE_BASE = [
   { id: 'relationships', label: 'Included Relationships', countKey: 'relationships' },
   { id: 'issues', label: 'Issues', countKey: 'issues' },
-  CONSEQUENCES_TAB,
 ];
 
-const TABS_BOTTOM = [
+const TABS_BOTTOM_BASE = [
   { id: 'objects', label: 'Included Object Types', countKey: 'objects' },
   { id: 'eventSources', label: 'Included Event Sources', countKey: 'eventSources' },
   { id: 'relationships', label: 'Included Relationships', countKey: 'relationships' },
   { id: 'issues', label: 'Issues / Problems', countKey: 'issues' },
-  CONSEQUENCES_TAB,
 ];
+
+function buildTabs(inventoryPlacement, showConsequencesTab) {
+  const base = isBottomInventory(inventoryPlacement) ? TABS_BOTTOM_BASE : TABS_SIDE_BASE;
+  const tabs = [...base, AGENT_CONTEXT_TAB];
+  if (showConsequencesTab) {
+    tabs.push(CONSEQUENCES_TAB);
+  }
+  return tabs;
+}
 
 function tabLabel(tab, tabCounts) {
   if (!tab.countKey) return tab.label;
@@ -108,8 +117,12 @@ export default function BottomPanelV7({
   highlightedRelationshipId = null,
   perspectiveEmpty = false,
   inventoryPlacement,
+  showConsequencesTab = false,
 }) {
-  const tabs = isBottomInventory(inventoryPlacement) ? TABS_BOTTOM : TABS_SIDE;
+  const tabs = useMemo(
+    () => buildTabs(inventoryPlacement, showConsequencesTab),
+    [inventoryPlacement, showConsequencesTab],
+  );
 
   const selectedRelationshipId =
     selection?.type === 'relationship' || selection?.type === 'cycleEdge'
@@ -285,7 +298,22 @@ export default function BottomPanelV7({
               </div>
             )}
 
-            {activeTab === 'consequences' && (
+            {activeTab === 'agentContext' &&
+              (perspectiveEmpty ? (
+                <PanelEmptyHint
+                  variant="perspective"
+                  text="Agent context appears once you start building."
+                />
+              ) : (
+                <textarea
+                  className={v7Styles.agentEditor}
+                  readOnly
+                  value={agentContextMarkdown}
+                  aria-label="Agent context markdown"
+                />
+              ))}
+
+            {activeTab === 'consequences' && showConsequencesTab && (
               <div className={v7Styles.impactBody}>
                 <ImpactPreviewPanel preview={consequencesPreview ?? impactPreview} />
               </div>
