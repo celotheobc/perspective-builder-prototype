@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import ToastyEasterEgg from './components/easterEgg/ToastyEasterEgg';
+import { useKonamiCode } from './components/easterEgg/useKonamiCode';
 import PrototypeCover from './pages/cover/PrototypeCover';
 import PerspectiveBuilderV1 from './pages/v1/PerspectiveBuilderV1';
 import PerspectiveBuilderV2 from './pages/v2/PerspectiveBuilderV2';
@@ -27,6 +29,17 @@ export default function App() {
     const saved = sessionStorage.getItem('pb-prototype-version');
     return resolveVersion(saved);
   });
+  const [toastyActive, setToastyActive] = useState(false);
+
+  const triggerToasty = useCallback(() => {
+    setToastyActive(true);
+  }, []);
+
+  const dismissToasty = useCallback(() => {
+    setToastyActive(false);
+  }, []);
+
+  useKonamiCode(triggerToasty);
 
   const handleVersionChange = (next) => {
     setVersion(next);
@@ -61,5 +74,10 @@ export default function App() {
     return <PerspectiveBuilderV3 onVersionChange={handleVersionChange} />;
   }, [version]);
 
-  return page;
+  return (
+    <>
+      {page}
+      <ToastyEasterEgg active={toastyActive} onDone={dismissToasty} />
+    </>
+  );
 }
