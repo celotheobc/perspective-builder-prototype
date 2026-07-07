@@ -170,7 +170,7 @@ function RouteEdgeComponent({
                 <div className={styles.scissorsHoverCardHeader}>
                   <p className={styles.scissorsHoverCardTitle}>{hoverCard.name}</p>
                   {hoverCard.isRecommended && (
-                    <span className={styles.scissorsHoverCardBadge}>Recommended</span>
+                    <span className={styles.scissorsHoverCardBadge}>Lowest impact</span>
                   )}
                 </div>
                 <p className={styles.scissorsHoverCardSummary}>{hoverCard.summary}</p>

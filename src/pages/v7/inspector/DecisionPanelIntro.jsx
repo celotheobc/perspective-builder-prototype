@@ -5,7 +5,7 @@ export function CycleResolutionIntro() {
     <div className={styles.intro}>
       <h3 className={styles.introTitle}>Resolve cycle</h3>
       <p className={styles.introText}>
-        A recommended option is available below. Preview consequences, or compare
+        All options available are shown below. You may preview consequences or compare
         alternatives before removing a relationship.
       </p>
     </div>

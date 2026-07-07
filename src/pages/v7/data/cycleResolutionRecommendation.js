@@ -94,9 +94,6 @@ export function rankCycleResolutionOptions(loopRows) {
     .map((row, index) => ({
       ...row,
       isLowestImpact: index === 0,
-      summary:
-        index === 0
-          ? `Lowest impact option. ${row.recommendationRationale}`
-          : row.impactSummary,
+      summary: index === 0 ? row.recommendationRationale : row.impactSummary,
     }));
 }

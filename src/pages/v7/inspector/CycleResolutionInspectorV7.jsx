@@ -27,7 +27,7 @@ function ResolutionOptionCard({
           <p className={styles.loopName}>{row.name}</p>
           {isLowestImpact && (
             <span className={`${styles.optionBadge} ${styles.optionBadgeRecommended}`}>
-              Recommended
+              Lowest impact
             </span>
           )}
         </div>
@@ -58,7 +58,7 @@ function ResolutionOptionCard({
               className={styles.loopRemoveSecondary}
               onClick={() => onRemoveRelationship(row.id)}
             >
-              Remove relationship
+              Remove this relationship
             </button>
           )}
         </div>
